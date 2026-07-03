@@ -11,25 +11,25 @@ const DEMO_BASE_TS = Date.UTC(2026, 0, 1, 10, 0, 0);
 
 const DEVICE_POSITIONS = {
   "Drawing Room": [
-    { type: "fan", idx: 1, x: "57%", y: "24%" },
-    { type: "fan", idx: 2, x: "58%", y: "69%" },
-    { type: "light", idx: 1, x: "31%", y: "27%" },
-    { type: "light", idx: 2, x: "83%", y: "26%" },
-    { type: "light", idx: 3, x: "58%", y: "84%" },
+    { type: "fan", idx: 1, x: "58%", y: "34%" },
+    { type: "fan", idx: 2, x: "58%", y: "73%" },
+    { type: "light", idx: 1, x: "31%", y: "32%" },
+    { type: "light", idx: 2, x: "78%", y: "32%" },
+    { type: "light", idx: 3, x: "58%", y: "88%" },
   ],
   "Work Room 1": [
-    { type: "fan", idx: 1, x: "52%", y: "26%" },
-    { type: "fan", idx: 2, x: "51%", y: "66%" },
-    { type: "light", idx: 1, x: "28%", y: "27%" },
-    { type: "light", idx: 2, x: "82%", y: "27%" },
-    { type: "light", idx: 3, x: "51%", y: "84%" },
+    { type: "fan", idx: 1, x: "52%", y: "30%" },
+    { type: "fan", idx: 2, x: "52%", y: "67%" },
+    { type: "light", idx: 1, x: "23%", y: "25%" },
+    { type: "light", idx: 2, x: "81%", y: "25%" },
+    { type: "light", idx: 3, x: "52%", y: "86%" },
   ],
   "Work Room 2": [
-    { type: "fan", idx: 1, x: "51%", y: "26%" },
-    { type: "fan", idx: 2, x: "50%", y: "66%" },
-    { type: "light", idx: 1, x: "29%", y: "27%" },
-    { type: "light", idx: 2, x: "83%", y: "27%" },
-    { type: "light", idx: 3, x: "50%", y: "84%" },
+    { type: "fan", idx: 1, x: "51%", y: "30%" },
+    { type: "fan", idx: 2, x: "51%", y: "67%" },
+    { type: "light", idx: 1, x: "23%", y: "25%" },
+    { type: "light", idx: 2, x: "82%", y: "25%" },
+    { type: "light", idx: 3, x: "51%", y: "86%" },
   ],
 };
 
@@ -142,6 +142,15 @@ function buildAlerts(devices, officeHours, power = null, ts = Date.now()) {
     }
   });
   return alerts;
+}
+
+function mergeAlertHistory(history, alerts) {
+  const seen = new Set(history.map((alert) => `${alert.level}:${alert.message}`));
+  const additions = alerts
+    .filter((alert) => !seen.has(`${alert.level}:${alert.message}`))
+    .map((alert) => ({ ...alert, ts: alert.ts || Date.now() }));
+  if (!additions.length) return history;
+  return [...additions, ...history].slice(0, 40);
 }
 
 function fmtTime(date = new Date()) {
@@ -257,6 +266,7 @@ export default function DashboardPage() {
   const [backendInput, setBackendInput] = useState(DEFAULT_BACKEND_URL);
   const [infoOpen, setInfoOpen] = useState(false);
   const [now, setNow] = useState(null);
+  const [alertHistory, setAlertHistory] = useState([]);
   const connectedRef = useRef(false);
 
   useEffect(() => {
@@ -339,6 +349,11 @@ export default function DashboardPage() {
   const moneyEstimate = Math.round(Number(estimatedKwh) * 12.5);
   const visibleAlerts = alerts.length ? alerts : buildAlerts(devices, officeHours, power, now || DEMO_BASE_TS);
 
+  useEffect(() => {
+    if (!visibleAlerts.length) return;
+    setAlertHistory((current) => mergeAlertHistory(current, visibleAlerts));
+  }, [visibleAlerts]);
+
   const selectedDevice = useMemo(() => {
     return devices.find((device) => device.id === selectedDeviceId)
       || devices.find((device) => device.room === selectedRoom)
@@ -406,6 +421,7 @@ export default function DashboardPage() {
               </div>
 
               <Room className="drawing" room="Drawing Room" watt={roomPowerFrom(devices, power, "Drawing Room")} heat={Math.min(0.38, 0.06 + roomPowerFrom(devices, power, "Drawing Room") / ROOM_MAX_WATT * 0.32).toFixed(2)} selected={selectedRoom === "Drawing Room"} onSelect={selectRoom}>
+                <Fixture className="rug" left="48%" top="61%" />
                 <Fixture className="sofa" left="15%" top="48%" />
                 <Fixture className="table" left="43%" top="53%" />
                 <Fixture className="armchair" left="18%" top="80%" />
@@ -444,6 +460,7 @@ export default function DashboardPage() {
               <div className="door d4" />
               <div className="entry">ENTRY</div>
             </div>
+            <SelectedDeviceBubble device={selectedDevice} now={now} />
           </div>
 
           <div className="floor-footer">
@@ -457,34 +474,22 @@ export default function DashboardPage() {
           </div>
         </section>
 
-        <section className="panel" style={{ marginTop: 16 }}>
-          <div className="panel-head">
-            <div>
-              <h3>Live usage snapshot</h3>
-              <p>Stats stay below the visual map so the floorplan remains the main demo moment.</p>
-            </div>
-            <span className="chip" style={{ background: officeHours ? "var(--sage-deep)" : "var(--red)" }}>{officeHours ? "Office Hours" : "After Hours"}</span>
-          </div>
-          <div className="metrics">
-            <Metric label="Total power" value={`${totalPower} W`} sub={`${onDevices.length} / ${devices.length} devices running`} />
-            <Metric label="Usage today" value={`${estimatedKwh} kWh`} sub={`Approx. ৳${moneyEstimate} at ৳12.5/kWh`} />
-            <Metric label="Fans running" value={`${fansOn} / 6`} sub="60W each when on" />
-            <Metric label="Lights on" value={`${lightsOn} / 9`} sub={`${loadPct}% of max office load`} />
-          </div>
-        </section>
-
-        <section className="below-grid">
+        <section className="insights-deck">
+          <UsageShowcase
+            totalPower={totalPower}
+            estimatedKwh={estimatedKwh}
+            moneyEstimate={moneyEstimate}
+            onCount={onDevices.length}
+            totalDevices={devices.length}
+            fansOn={fansOn}
+            lightsOn={lightsOn}
+            loadPct={loadPct}
+            officeHours={officeHours}
+          />
           <RoomHealth devices={devices} power={power} selectedRoom={selectedRoom} onSelect={selectRoom} />
-          <SelectedDevice device={selectedDevice} now={now} />
-        </section>
-
-        <section className="below-grid">
-          <AlertsPanel alerts={visibleAlerts} now={now} />
+          <AlertsPanel alerts={alertHistory.length ? alertHistory : visibleAlerts} currentCount={visibleAlerts.length} now={now} />
           <DeviceInventory devices={devices} selectedDeviceId={selectedDeviceId} now={now} onSelect={selectDevice} />
         </section>
-
-        <SystemFlow />
-        <HardwareSchematic />
 
         <div className="footer">
           Next.js frontend is backend-ready. Set <code>NEXT_PUBLIC_BACKEND_URL</code> or use the floating ⚡ modal. Backend can be Node, Python, or anything that returns the documented JSON.
@@ -528,23 +533,41 @@ export default function DashboardPage() {
   );
 }
 
-function Metric({ label, value, sub }) {
+function UsageShowcase({ totalPower, estimatedKwh, moneyEstimate, onCount, totalDevices, fansOn, lightsOn, loadPct, officeHours }) {
   return (
-    <div className="metric">
-      <b>{label}</b>
-      <strong>{value}</strong>
-      <span>{sub}</span>
-    </div>
+    <article className="insight-card usage-showcase">
+      <div className="insight-head">
+        <div>
+          <span className="kicker">Live usage snapshot</span>
+          <h3>{totalPower}W</h3>
+          <p>{onCount}/{totalDevices} devices running right now</p>
+        </div>
+        <span className={`status-pill ${officeHours ? "open" : "after"}`}>{officeHours ? "Office Hours" : "After Hours"}</span>
+      </div>
+      <div className="power-dial" style={{ "--load": `${Math.min(loadPct, 100)}%` }}>
+        <div>
+          <strong>{loadPct}%</strong>
+          <span>office load</span>
+        </div>
+      </div>
+      <div className="usage-strip">
+        <span><b>{estimatedKwh}</b> kWh today</span>
+        <span><b>৳{moneyEstimate}</b> estimated</span>
+        <span><b>{fansOn}/6</b> fans</span>
+        <span><b>{lightsOn}/9</b> lights</span>
+      </div>
+    </article>
   );
 }
 
 function RoomHealth({ devices, power, selectedRoom, onSelect }) {
   return (
-    <div className="panel">
-      <div className="panel-head">
+    <article className="insight-card room-health-card">
+      <div className="insight-head">
         <div>
+          <span className="kicker">Per-room status</span>
           <h3>Room health</h3>
-          <p>Click a room here or directly on the floorplan.</p>
+          <p>Click a room here or directly on the office layout.</p>
         </div>
       </div>
       <div className="room-list">
@@ -567,61 +590,46 @@ function RoomHealth({ devices, power, selectedRoom, onSelect }) {
           );
         })}
       </div>
-    </div>
+    </article>
   );
 }
 
-function SelectedDevice({ device, now }) {
+function SelectedDeviceBubble({ device, now }) {
   if (!device) {
-    return (
-      <div className="panel">
-        <div className="panel-head"><h3>Selected device</h3></div>
-        <div className="empty">Waiting for device data</div>
-      </div>
-    );
+    return <aside className="selected-bubble">Waiting for device data</aside>;
   }
   return (
-    <div className="panel">
-      <div className="panel-head">
-        <div>
-          <h3>Selected device</h3>
-          <p>{device.room} · {device.label}</p>
-        </div>
+    <aside className={`selected-bubble ${device.on ? "active" : ""}`}>
+      <div className="bubble-icon">{device.type === "fan" ? "🌀" : "💡"}</div>
+      <div>
+        <span className="kicker">Selected device</span>
+        <h3>{device.label}</h3>
+        <p>{device.room}</p>
       </div>
-      <div className="detail">
-        <Detail label="Status" value={device.on ? "ON" : "OFF"} />
-        <Detail label="Current draw" value={`${device.on ? device.watt : 0} W`} />
-        <Detail label="Rated" value={`${device.watt} W`} />
-        <Detail label="Changed" value={displayRelativeTime(device.lastChanged, now)} />
-        <Detail label="Room" value={device.room} />
-        <Detail label="Type" value={device.type} />
+      <div className="bubble-stats">
+        <span><b>{device.on ? "ON" : "OFF"}</b>Status</span>
+        <span><b>{device.on ? device.watt : 0}W</b>Now</span>
+        <span><b>{displayRelativeTime(device.lastChanged, now)}</b>Changed</span>
       </div>
-    </div>
+    </aside>
   );
 }
 
-function Detail({ label, value }) {
+function AlertsPanel({ alerts, currentCount, now }) {
   return (
-    <div className="detail-tile">
-      <b>{label}</b>
-      <span>{value}</span>
-    </div>
-  );
-}
-
-function AlertsPanel({ alerts, now }) {
-  return (
-    <div className="panel">
-      <div className="panel-head">
+    <article className="insight-card alerts-card">
+      <div className="insight-head">
         <div>
+          <span className="kicker">Alert timeline</span>
           <h3>Energy alerts</h3>
-          <p>After-hours and high-load warnings for Discord-style action.</p>
+          <p>Scroll kore previous alerts-o dekhte parba.</p>
         </div>
+        <span className="status-pill after">{currentCount} active</span>
       </div>
-      <div className="alerts">
+      <div className="alerts scroll-panel">
         {!alerts.length ? (
           <div className="empty">✅ All clear right now</div>
-        ) : alerts.slice(0, 8).map((alert, index) => (
+        ) : alerts.map((alert, index) => (
           <article key={`${alert.message}-${index}`} className={`alert ${alert.level === "danger" ? "danger" : ""}`}>
             <div>{alert.level === "danger" ? "🚨" : "⚠️"}</div>
             <div>
@@ -631,21 +639,22 @@ function AlertsPanel({ alerts, now }) {
           </article>
         ))}
       </div>
-    </div>
+    </article>
   );
 }
 
 function DeviceInventory({ devices, selectedDeviceId, now, onSelect }) {
   const sorted = [...devices].sort((a, b) => ROOMS.indexOf(a.room) - ROOMS.indexOf(b.room) || a.type.localeCompare(b.type) || a.label.localeCompare(b.label));
   return (
-    <div className="panel">
-      <div className="panel-head">
+    <article className="insight-card inventory-card">
+      <div className="insight-head">
         <div>
+          <span className="kicker">Device matrix</span>
           <h3>Device inventory</h3>
           <p>All devices with power draw and last changed time.</p>
         </div>
       </div>
-      <div className="device-list">
+      <div className="device-list scroll-panel">
         {sorted.map((device) => (
           <article key={device.id} className={`device-row ${device.on ? "on" : ""} ${selectedDeviceId === device.id ? "selected" : ""}`} onClick={() => onSelect(device)}>
             <div className="device-icon">{device.type === "fan" ? "🌀" : "💡"}</div>
@@ -657,68 +666,6 @@ function DeviceInventory({ devices, selectedDeviceId, now, onSelect }) {
           </article>
         ))}
       </div>
-    </div>
-  );
-}
-
-function SystemFlow() {
-  const steps = [
-    ["💡🌀", "Devices", "2 fans and 3 lights in each room."],
-    ["📟", "ESP32 / Simulator", "Reads relay state/current or generates demo data."],
-    ["🧠", "Backend API", "Single source of truth for dashboard and Discord bot."],
-    ["🖥️", "Next.js Dashboard", "Polls live status and paints the top-view map."],
-    ["🤖", "Discord bot", "Answers status, usage, and room questions from same API."],
-  ];
-  return (
-    <section className="panel" style={{ marginTop: 16 }}>
-      <div className="panel-head">
-        <div>
-          <h3>High-level system flow</h3>
-          <p>Presentation-ready diagram without Mermaid.</p>
-        </div>
-      </div>
-      <div className="diagram-grid">
-        {steps.map(([icon, title, copy]) => (
-          <div className="flow" key={title}>
-            <div>{icon}</div>
-            <h4>{title}</h4>
-            <p>{copy}</p>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function HardwareSchematic() {
-  return (
-    <section className="panel" style={{ marginTop: 16 }}>
-      <div className="panel-head">
-        <div>
-          <h3>Hardware schematic concept</h3>
-          <p>Representative one-room electrical design for Wokwi/Tinkercad.</p>
-        </div>
-      </div>
-      <div className="schematic">
-        <div className="board">
-          <div className="part" style={{ left: "6%", top: "28%", width: 120 }}>ESP32<small>GPIO inputs/outputs</small></div>
-          <div className="part" style={{ left: "37%", top: "13%", width: 110 }}>Relay x5<small>isolated switching</small></div>
-          <div className="part" style={{ left: "70%", top: "10%", width: 118 }}>Lights x3<small>15W each</small></div>
-          <div className="part" style={{ left: "70%", top: "53%", width: 118 }}>Fans x2<small>60W each</small></div>
-          <div className="part" style={{ left: "37%", top: "59%", width: 122 }}>ACS712<small>current sensor</small></div>
-          <div className="part" style={{ left: "7%", top: "74%", width: 118 }}>5V supply<small>logic power</small></div>
-          <div className="wire" style={{ "--c": "#ffcf5a", left: "25%", top: "39%", width: "20%", transform: "rotate(-18deg)" }} />
-          <div className="wire" style={{ "--c": "#78c8d4", left: "52%", top: "27%", width: "19%", transform: "rotate(-9deg)" }} />
-          <div className="wire" style={{ "--c": "#f4a43d", left: "52%", top: "67%", width: "19%", transform: "rotate(4deg)" }} />
-          <div className="wire" style={{ "--c": "#2fbf7b", left: "25%", top: "78%", width: "15%", transform: "rotate(-22deg)" }} />
-          <div className="wire" style={{ "--c": "#7fc59b", left: "32%", top: "45%", width: "18%", transform: "rotate(46deg)" }} />
-        </div>
-        <div className="notes">
-          <div className="note"><strong>Physical sense:</strong> ESP32 controls/reads a relay module; relay contacts switch AC loads while logic stays isolated.</div>
-          <div className="note"><strong>Current sensing:</strong> ACS712 or CT clamp measures room supply current, then backend estimates wattage per known device rating.</div>
-          <div className="note"><strong>Hackathon scope:</strong> Build one room in Wokwi/Tinkercad and repeat the same block conceptually for three rooms.</div>
-        </div>
-      </div>
-    </section>
+    </article>
   );
 }

@@ -461,11 +461,26 @@ button {
   filter: drop-shadow(0 10px 8px rgba(67, 88, 75, 0.15));
 }
 
+.rug {
+  z-index: 3;
+  width: 142px;
+  height: 178px;
+  border-radius: 22px;
+  background:
+    radial-gradient(ellipse at center, rgba(255,255,255,0.16), transparent 58%),
+    repeating-linear-gradient(90deg, rgba(130, 93, 59, 0.10) 0 3px, transparent 3px 13px),
+    linear-gradient(135deg, #cfb58f, #b89068);
+  filter: none;
+  box-shadow: inset 0 0 0 10px rgba(255,255,255,0.10), inset 0 0 0 12px rgba(98,67,42,0.08);
+}
+
 .sofa {
-  width: 62px;
-  height: 168px;
-  border-radius: 19px;
-  background: linear-gradient(90deg, #aa8a61, #e4c99d 47%, #b28f65);
+  width: 70px;
+  height: 174px;
+  border-radius: 24px;
+  background:
+    linear-gradient(90deg, rgba(93,63,38,0.18) 0 10px, transparent 10px calc(100% - 10px), rgba(93,63,38,0.18) calc(100% - 10px)),
+    linear-gradient(90deg, #a98960, #e7cba0 47%, #b28f65);
   box-shadow:
     inset 7px 0 0 rgba(255,255,255,0.18),
     inset -7px 0 0 rgba(92, 64, 39, 0.12),
@@ -488,15 +503,16 @@ button {
 .sofa::before {
   content: "";
   position: absolute;
-  inset: 15px 8px;
-  border-top: 2px solid rgba(77, 54, 35, 0.22);
-  border-bottom: 2px solid rgba(77, 54, 35, 0.22);
+  inset: 17px 10px;
+  background:
+    linear-gradient(rgba(77,54,35,0.18), rgba(77,54,35,0.18)) 0 33% / 100% 2px no-repeat,
+    linear-gradient(rgba(77,54,35,0.18), rgba(77,54,35,0.18)) 0 66% / 100% 2px no-repeat;
 }
 
 .table {
-  width: 62px;
-  height: 98px;
-  border-radius: 12px;
+  width: 68px;
+  height: 104px;
+  border-radius: 16px;
   background:
     linear-gradient(135deg, rgba(255,255,255,0.18), transparent 42%),
     linear-gradient(135deg, #765336, #b48554);
@@ -524,7 +540,7 @@ button {
 .desk {
   width: 82px;
   height: 52px;
-  border-radius: 8px;
+  border-radius: 10px;
   background:
     linear-gradient(135deg, rgba(255,255,255,0.24), transparent 45%),
     linear-gradient(135deg, #b47b45, #e0ab68);
@@ -556,7 +572,7 @@ button {
 .chair {
   width: 38px;
   height: 34px;
-  border-radius: 11px 11px 15px 15px;
+  border-radius: 14px 14px 18px 18px;
   background: linear-gradient(#405460, #23333d);
   box-shadow: inset 0 -8px 0 rgba(0,0,0,0.15), 0 5px 0 rgba(28, 43, 50, 0.13), 0 9px 10px rgba(50, 66, 59, 0.10);
 }
@@ -945,34 +961,147 @@ button {
   cursor: pointer;
 }
 
-.below-grid {
+.insights-deck {
   display: grid;
-  grid-template-columns: 1.2fr .8fr;
+  grid-template-columns: minmax(280px, .95fr) minmax(280px, 1.05fr) minmax(280px, 1fr) minmax(300px, 1.1fr);
   gap: 16px;
-  margin-top: 16px;
+  align-items: stretch;
+  margin-top: 22px;
 }
 
-.panel {
-  border-radius: 28px;
-  background: rgba(255,255,255,0.38);
-  box-shadow: none;
+.insight-card {
+  position: relative;
   overflow: hidden;
+  border-radius: 30px;
+  padding: 18px;
+  min-height: 380px;
+  background:
+    linear-gradient(145deg, rgba(255,255,255,0.58), rgba(255,255,255,0.25)),
+    radial-gradient(circle at 18% 12%, rgba(199,234,214,0.45), transparent 18rem);
 }
 
-.panel-head {
+.usage-showcase {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  background:
+    radial-gradient(circle at 50% 48%, rgba(255,207,90,0.18), transparent 11rem),
+    linear-gradient(145deg, rgba(255,255,255,0.62), rgba(223,242,231,0.28));
+}
+
+.room-health-card {
+  background:
+    linear-gradient(145deg, rgba(255,255,255,0.58), rgba(231,243,235,0.28)),
+    radial-gradient(circle at 90% 10%, rgba(47,191,123,0.12), transparent 12rem);
+}
+
+.alerts-card {
+  background:
+    linear-gradient(145deg, rgba(255,250,238,0.72), rgba(255,255,255,0.28)),
+    radial-gradient(circle at 12% 8%, rgba(244,164,61,0.12), transparent 12rem);
+}
+
+.inventory-card {
+  background:
+    linear-gradient(145deg, rgba(255,255,255,0.62), rgba(238,247,241,0.28)),
+    radial-gradient(circle at 82% 10%, rgba(127,197,155,0.14), transparent 13rem);
+}
+
+.insight-head {
   align-items: center;
-  padding: 18px 20px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
 }
 
+.insight-head h3,
 .panel-head h3 {
   margin: 0;
-  font-size: 18px;
+  font-size: 20px;
   letter-spacing: -0.03em;
 }
 
+.insight-head p,
 .panel-head p {
   margin: 4px 0 0;
   font-size: 12px;
+}
+
+.kicker {
+  display: block;
+  color: var(--sage-deep);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 7px 10px;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 900;
+  white-space: nowrap;
+  background: var(--sage-deep);
+}
+
+.status-pill.after {
+  background: var(--red);
+}
+
+.power-dial {
+  width: min(190px, 100%);
+  aspect-ratio: 1;
+  align-self: center;
+  justify-self: center;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, rgba(255,255,255,0.86) 0 52%, transparent 53%),
+    conic-gradient(var(--mint) 0 var(--load), rgba(69, 91, 78, 0.10) var(--load) 100%);
+}
+
+.power-dial div {
+  text-align: center;
+}
+
+.power-dial strong {
+  display: block;
+  font-size: 34px;
+  letter-spacing: -0.06em;
+}
+
+.power-dial span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.usage-strip {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+}
+
+.usage-strip span {
+  border-radius: 18px;
+  padding: 10px;
+  background: rgba(255,255,255,0.48);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.usage-strip b {
+  color: var(--ink);
+  display: block;
+  font-size: 16px;
 }
 
 .metrics {
@@ -1016,7 +1145,7 @@ button {
 .room-list,
 .device-list,
 .alerts {
-  padding: 16px;
+  padding: 0;
   display: grid;
   gap: 10px;
 }
@@ -1027,8 +1156,8 @@ button {
 .detail-tile,
 .flow,
 .note {
-  border-radius: 18px;
-  background: rgba(255,255,255,0.42);
+  border-radius: 20px;
+  background: rgba(255,255,255,0.50);
   padding: 13px;
   box-shadow: none;
 }
@@ -1089,8 +1218,22 @@ button {
 }
 
 .device-list {
-  max-height: 460px;
-  overflow: auto;
+  max-height: none;
+}
+
+.scroll-panel {
+  max-height: 296px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.scroll-panel::-webkit-scrollbar {
+  width: 7px;
+}
+
+.scroll-panel::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(71, 111, 88, 0.24);
 }
 
 .device-row {
@@ -1124,12 +1267,10 @@ button {
   grid-template-columns: auto 1fr;
   gap: 10px;
   background: rgba(255, 245, 218, 0.74);
-  border-color: rgba(244, 164, 61, 0.22);
 }
 
 .alert.danger {
   background: rgba(255, 232, 234, 0.82);
-  border-color: rgba(232, 93, 103, 0.24);
 }
 
 .empty {
@@ -1139,24 +1280,67 @@ button {
   font-weight: 820;
 }
 
-.detail {
+.selected-bubble {
+  position: absolute;
+  right: clamp(0px, 1.6vw, 24px);
+  top: clamp(18px, 4vw, 50px);
+  z-index: 60;
+  width: min(250px, 24vw);
+  border-radius: 28px;
   padding: 16px;
+  background: rgba(255,255,255,0.72);
+  backdrop-filter: blur(14px);
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
+  gap: 12px;
 }
 
-.detail-tile b {
-  display: block;
+.selected-bubble.active {
+  background: rgba(224, 247, 233, 0.78);
+}
+
+.selected-bubble h3 {
+  margin: 0;
+  font-size: 22px;
+  letter-spacing: -0.04em;
+}
+
+.selected-bubble p {
+  margin: 3px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.bubble-icon {
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border-radius: 18px;
+  background: rgba(255,255,255,0.64);
+  font-size: 24px;
+}
+
+.bubble-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+}
+
+.bubble-stats span {
+  border-radius: 16px;
+  padding: 9px;
+  background: rgba(255,255,255,0.50);
   color: var(--muted);
   font-size: 10px;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  margin-bottom: 8px;
+  font-weight: 800;
 }
 
-.detail-tile span {
-  font-weight: 950;
+.bubble-stats b {
+  display: block;
+  color: var(--ink);
+  font-size: 12px;
+  margin-bottom: 2px;
 }
 
 .diagram-grid {
