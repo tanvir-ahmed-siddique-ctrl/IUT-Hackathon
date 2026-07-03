@@ -580,21 +580,11 @@ button {
     0 0 0 4px rgba(127,197,155,0.16);
 }
 
-.device.light::before {
-  content: "";
-  width: 19px;
-  height: 19px;
-  border-radius: 50%;
-  border: 2px solid currentColor;
-  background:
-    radial-gradient(circle at 35% 30%, rgba(255,255,255,0.96), rgba(255,255,255,0.30) 35%, transparent 36%),
-    rgba(255,255,255,0.38);
-  box-shadow: inset 0 -2px 0 rgba(71, 78, 68, 0.10);
-}
-
 .device.light.on {
   color: #fff7c8;
-  background: radial-gradient(circle, rgba(255,255,255,0.96) 0 16%, #fff4a7 17% 38%, #efbd4a 39% 61%, #9d7332 62%);
+  background:
+    radial-gradient(circle at 36% 30%, rgba(255,255,255,0.96) 0 8%, transparent 9%),
+    radial-gradient(circle, #fff7ba 0 31%, #efbd4a 32% 58%, #9d7332 59%);
   box-shadow: 0 7px 0 rgba(135, 96, 38, 0.13), 0 0 24px rgba(255, 207, 90, 0.82), 0 0 58px rgba(255, 207, 90, 0.28);
 }
 
@@ -606,6 +596,58 @@ button {
   background: radial-gradient(circle, rgba(255, 218, 100, 0.30), transparent 68%);
   z-index: -1;
   pointer-events: none;
+}
+
+.light-core {
+  position: absolute;
+  inset: 4px;
+  display: grid;
+  place-items: center;
+}
+
+.light-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  filter: drop-shadow(0 3px 2px rgba(117, 82, 34, 0.18));
+}
+
+.light-halo {
+  fill: rgba(255, 225, 126, 0.10);
+  opacity: .2;
+}
+
+.light-glass {
+  fill: rgba(255,255,255,0.42);
+  stroke: currentColor;
+  stroke-width: 2.5;
+}
+
+.light-shine {
+  fill: none;
+  stroke: rgba(255,255,255,0.82);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+}
+
+.light-cap {
+  fill: currentColor;
+  opacity: .42;
+}
+
+.device.light.on .light-halo {
+  fill: rgba(255, 216, 100, 0.38);
+  opacity: 1;
+}
+
+.device.light.on .light-glass {
+  fill: #fff7bf;
+  stroke: #fff3a8;
+}
+
+.device.light.on .light-cap {
+  fill: #ffcf5a;
+  opacity: .95;
 }
 
 .device.fan {
@@ -633,14 +675,19 @@ button {
 }
 
 .fan-svg .blade-shape {
-  fill: currentColor;
-  opacity: .88;
+  opacity: .92;
 }
 
 .fan-svg .hub {
   fill: currentColor;
   stroke: rgba(255,255,255,0.42);
   stroke-width: 3;
+}
+
+.fan-svg .fan-ring {
+  fill: none;
+  stroke: rgba(255,255,255,0.32);
+  stroke-width: 1.8;
 }
 
 .device.fan.on {

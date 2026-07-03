@@ -7,6 +7,7 @@ const ROOM_MAX_WATT = 2 * 60 + 3 * 15;
 const DEFAULT_BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4000";
 const POLL_MS = 3000;
 const SIM_MS = 3200;
+const DEMO_BASE_TS = Date.UTC(2026, 0, 1, 10, 0, 0);
 
 const DEVICE_POSITIONS = {
   "Drawing Room": [
@@ -42,7 +43,7 @@ function isOfficeHours(date = new Date()) {
 }
 
 function buildInitialDevices() {
-  const now = Date.now();
+  const now = DEMO_BASE_TS;
   return ROOMS.flatMap((room, roomIndex) => {
     const devices = [];
     for (let i = 1; i <= 2; i += 1) {
@@ -119,15 +120,14 @@ function totalPowerFrom(devices, power) {
   return devices.filter((device) => device.on).reduce((sum, device) => sum + device.watt, 0);
 }
 
-function buildAlerts(devices, officeHours, power = null) {
+function buildAlerts(devices, officeHours, power = null, ts = Date.now()) {
   const alerts = [];
-  const now = Date.now();
   if (!officeHours) {
     devices.filter((device) => device.on).slice(0, 6).forEach((device) => {
       alerts.push({
         level: "danger",
         message: `${device.label} in ${device.room} is still ON after office hours.`,
-        ts: now,
+        ts,
       });
     });
   }
@@ -135,10 +135,10 @@ function buildAlerts(devices, officeHours, power = null) {
     const watt = roomPowerFrom(devices, power, room);
     const roomDevices = devices.filter((device) => device.room === room);
     if (watt >= ROOM_MAX_WATT * 0.75) {
-      alerts.push({ level: "warn", message: `${room} is using ${watt}W, close to full load.`, ts: now });
+      alerts.push({ level: "warn", message: `${room} is using ${watt}W, close to full load.`, ts });
     }
     if (roomDevices.length && roomDevices.every((device) => device.on)) {
-      alerts.push({ level: "warn", message: `${room} has every fan and light running.`, ts: now });
+      alerts.push({ level: "warn", message: `${room} has every fan and light running.`, ts });
     }
   });
   return alerts;
@@ -162,19 +162,44 @@ function relativeTime(ts, now = Date.now()) {
   return `${Math.floor(hours / 24)}d ago`;
 }
 
+function displayRelativeTime(ts, now) {
+  return now ? relativeTime(ts, now) : "syncing";
+}
+
 function getDevicePosition(device) {
   const index = Number((device.label.match(/\d+/) || ["1"])[0]);
   return (DEVICE_POSITIONS[device.room] || []).find((pos) => pos.type === device.type && pos.idx === index) || { x: "50%", y: "50%" };
 }
 
-function FanIcon() {
+function FanIcon({ id }) {
+  const gradientId = `fanBlade-${id}`;
   return (
     <span className="fan-core" aria-hidden="true">
-      <svg className="fan-svg" viewBox="0 0 36 36" focusable="false">
-        <path className="blade-shape" d="M18 3.5c4.2 0 7.1 3.3 5.8 7.3-.8 2.5-3 4.1-5.8 5.5-2.8-1.4-5-3-5.8-5.5C10.9 6.8 13.8 3.5 18 3.5Z" />
-        <path className="blade-shape" transform="rotate(120 18 18)" d="M18 3.5c4.2 0 7.1 3.3 5.8 7.3-.8 2.5-3 4.1-5.8 5.5-2.8-1.4-5-3-5.8-5.5C10.9 6.8 13.8 3.5 18 3.5Z" />
-        <path className="blade-shape" transform="rotate(240 18 18)" d="M18 3.5c4.2 0 7.1 3.3 5.8 7.3-.8 2.5-3 4.1-5.8 5.5-2.8-1.4-5-3-5.8-5.5C10.9 6.8 13.8 3.5 18 3.5Z" />
-        <circle className="hub" cx="18" cy="18" r="4.2" />
+      <svg className="fan-svg" viewBox="0 0 48 48" focusable="false">
+        <defs>
+          <linearGradient id={gradientId} x1="0" x2="1" y1="0" y2="1">
+            <stop offset="0%" stopColor="currentColor" stopOpacity="0.98" />
+            <stop offset="100%" stopColor="currentColor" stopOpacity="0.42" />
+          </linearGradient>
+        </defs>
+        <path className="blade-shape" fill={`url(#${gradientId})`} d="M24 4.4c5.4 0 9.8 4.1 8.4 9.6-1 3.9-4.5 6.5-8.4 8.3-3.9-1.8-7.4-4.4-8.4-8.3C14.2 8.5 18.6 4.4 24 4.4Z" />
+        <path className="blade-shape" fill={`url(#${gradientId})`} transform="rotate(120 24 24)" d="M24 4.4c5.4 0 9.8 4.1 8.4 9.6-1 3.9-4.5 6.5-8.4 8.3-3.9-1.8-7.4-4.4-8.4-8.3C14.2 8.5 18.6 4.4 24 4.4Z" />
+        <path className="blade-shape" fill={`url(#${gradientId})`} transform="rotate(240 24 24)" d="M24 4.4c5.4 0 9.8 4.1 8.4 9.6-1 3.9-4.5 6.5-8.4 8.3-3.9-1.8-7.4-4.4-8.4-8.3C14.2 8.5 18.6 4.4 24 4.4Z" />
+        <circle className="fan-ring" cx="24" cy="24" r="14.8" />
+        <circle className="hub" cx="24" cy="24" r="5.8" />
+      </svg>
+    </span>
+  );
+}
+
+function LightIcon() {
+  return (
+    <span className="light-core" aria-hidden="true">
+      <svg className="light-svg" viewBox="0 0 44 44" focusable="false">
+        <circle className="light-halo" cx="22" cy="22" r="18" />
+        <circle className="light-glass" cx="22" cy="22" r="11" />
+        <path className="light-shine" d="M16 15.5c2.2-2.2 6.1-3 9.2-1.8" />
+        <circle className="light-cap" cx="22" cy="22" r="4.2" />
       </svg>
     </span>
   );
@@ -182,6 +207,7 @@ function FanIcon() {
 
 function DeviceNode({ device, selected, now, onSelect }) {
   const pos = getDevicePosition(device);
+  const changedText = displayRelativeTime(device.lastChanged, now);
   return (
     <button
       type="button"
@@ -193,11 +219,11 @@ function DeviceNode({ device, selected, now, onSelect }) {
         onSelect(device);
       }}
     >
-      {device.type === "fan" && <FanIcon />}
+      {device.type === "fan" ? <FanIcon id={device.id} /> : <LightIcon />}
       <span className="tip">
         {device.label} · {device.on ? "ON" : "OFF"}
         <br />
-        {device.on ? device.watt : 0}W · {relativeTime(device.lastChanged, now)}
+        {device.on ? device.watt : 0}W · {changedText}
       </span>
     </button>
   );
@@ -222,7 +248,7 @@ export default function DashboardPage() {
   const [devices, setDevices] = useState(() => buildInitialDevices());
   const [alerts, setAlerts] = useState([]);
   const [power, setPower] = useState(null);
-  const [officeHours, setOfficeHours] = useState(() => isOfficeHours());
+  const [officeHours, setOfficeHours] = useState(true);
   const [connected, setConnected] = useState(false);
   const [selectedRoom, setSelectedRoom] = useState("Drawing Room");
   const [selectedDeviceId, setSelectedDeviceId] = useState(null);
@@ -230,7 +256,7 @@ export default function DashboardPage() {
   const [backendUrl, setBackendUrl] = useState(DEFAULT_BACKEND_URL);
   const [backendInput, setBackendInput] = useState(DEFAULT_BACKEND_URL);
   const [infoOpen, setInfoOpen] = useState(false);
-  const [now, setNow] = useState(() => Date.now());
+  const [now, setNow] = useState(null);
   const connectedRef = useRef(false);
 
   useEffect(() => {
@@ -246,6 +272,8 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
+    setNow(Date.now());
+    setOfficeHours(isOfficeHours());
     const timer = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(timer);
   }, []);
@@ -302,11 +330,14 @@ export default function DashboardPage() {
   const fansOn = onDevices.filter((device) => device.type === "fan").length;
   const lightsOn = onDevices.filter((device) => device.type === "light").length;
   const loadPct = Math.round((totalPower / (ROOMS.length * ROOM_MAX_WATT)) * 100);
+  const currentDate = now ? new Date(now) : null;
   const estimatedKwh = power && Number.isFinite(Number(power.estimatedKwhToday))
     ? Number(power.estimatedKwhToday).toFixed(2)
-    : ((totalPower / 1000) * (new Date(now).getHours() + new Date(now).getMinutes() / 60)).toFixed(2);
+    : currentDate
+      ? ((totalPower / 1000) * (currentDate.getHours() + currentDate.getMinutes() / 60)).toFixed(2)
+      : "0.00";
   const moneyEstimate = Math.round(Number(estimatedKwh) * 12.5);
-  const visibleAlerts = alerts.length ? alerts : buildAlerts(devices, officeHours, power);
+  const visibleAlerts = alerts.length ? alerts : buildAlerts(devices, officeHours, power, now || DEMO_BASE_TS);
 
   const selectedDevice = useMemo(() => {
     return devices.find((device) => device.id === selectedDeviceId)
@@ -315,8 +346,10 @@ export default function DashboardPage() {
   }, [devices, selectedDeviceId, selectedRoom]);
 
   const syncText = connected && lastSync
-    ? `Synced ${relativeTime(lastSync, now)} from backend`
+    ? `Synced ${displayRelativeTime(lastSync, now)} from backend`
     : `Simulator mode - backend unavailable, data changes every ${Math.round(SIM_MS / 1000)}s`;
+  const displayTime = currentDate ? fmtTime(currentDate) : "--:--:--";
+  const displayDate = currentDate ? fmtDate(currentDate) : "Loading local time";
 
   function handleBackendConnect() {
     const nextUrl = backendInput.trim() || DEFAULT_BACKEND_URL;
@@ -359,8 +392,8 @@ export default function DashboardPage() {
               <p>React-powered live floorplan for the fixed hackathon setup: 3 rooms, 2 fans and 3 lights per room, all reading from one backend when available.</p>
             </div>
             <div className="time-stack">
-              <div className="time">{fmtTime(new Date(now))}</div>
-              <div className="date">{fmtDate(new Date(now))}</div>
+              <div className="time" suppressHydrationWarning>{displayTime}</div>
+              <div className="date" suppressHydrationWarning>{displayDate}</div>
             </div>
           </div>
 
@@ -476,11 +509,11 @@ export default function DashboardPage() {
             <span>Simulator fallback included</span>
           </div>
           <div className="modal-lines">
-            <div className="modal-line"><span>Clock</span><strong>{fmtTime(new Date(now))}</strong></div>
-            <div className="modal-line"><span>Date</span><strong>{fmtDate(new Date(now))}</strong></div>
+            <div className="modal-line"><span>Clock</span><strong suppressHydrationWarning>{displayTime}</strong></div>
+            <div className="modal-line"><span>Date</span><strong suppressHydrationWarning>{displayDate}</strong></div>
             <div className="modal-line"><span>Mode</span><strong>{officeHours ? "Office Hours" : "After Hours"}</strong></div>
             <div className="modal-line"><span>Status</span><strong>{connected ? "Backend live" : "Simulator mode"}</strong></div>
-            <div className="modal-line"><span>Sync</span><strong>{connected && lastSync ? relativeTime(lastSync, now) : "offline"}</strong></div>
+            <div className="modal-line"><span>Sync</span><strong>{connected && lastSync ? displayRelativeTime(lastSync, now) : "offline"}</strong></div>
           </div>
           <div className="backend-box">
             <label htmlFor="backendUrl">Backend status endpoint base URL</label>
@@ -559,7 +592,7 @@ function SelectedDevice({ device, now }) {
         <Detail label="Status" value={device.on ? "ON" : "OFF"} />
         <Detail label="Current draw" value={`${device.on ? device.watt : 0} W`} />
         <Detail label="Rated" value={`${device.watt} W`} />
-        <Detail label="Changed" value={relativeTime(device.lastChanged, now)} />
+        <Detail label="Changed" value={displayRelativeTime(device.lastChanged, now)} />
         <Detail label="Room" value={device.room} />
         <Detail label="Type" value={device.type} />
       </div>
@@ -593,7 +626,7 @@ function AlertsPanel({ alerts, now }) {
             <div>{alert.level === "danger" ? "🚨" : "⚠️"}</div>
             <div>
               <div className="row-title">{alert.message}</div>
-              <div className="row-sub">Flagged {relativeTime(alert.ts, now)}</div>
+              <div className="row-sub">Flagged {displayRelativeTime(alert.ts, now)}</div>
             </div>
           </article>
         ))}
@@ -618,7 +651,7 @@ function DeviceInventory({ devices, selectedDeviceId, now, onSelect }) {
             <div className="device-icon">{device.type === "fan" ? "🌀" : "💡"}</div>
             <div>
               <div className="row-title">{device.room} · {device.label}</div>
-              <div className="row-sub">{device.type.toUpperCase()} · {device.watt}W rated · changed {relativeTime(device.lastChanged, now)}</div>
+              <div className="row-sub">{device.type.toUpperCase()} · {device.watt}W rated · changed {displayRelativeTime(device.lastChanged, now)}</div>
             </div>
             <span className="chip state">{device.on ? "ON" : "OFF"}</span>
           </article>
