@@ -2,479 +2,1855 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>OfficeQuest — Live Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OfficeQuest — Live Energy Command Center</title>
 <style>
-  :root{
-    --green:#58CC02;
-    --green-dark:#4CAD02;
-    --blue:#1CB0F6;
-    --blue-dark:#1899D6;
-    --yellow:#FFC800;
-    --yellow-dark:#E6B400;
-    --red:#FF4B4B;
-    --red-dark:#E63E3E;
-    --purple:#CE82FF;
-    --ink:#3C3C3C;
-    --grey:#AFAFAF;
-    --bg:#F7F9FB;
-    --card:#FFFFFF;
-    --line:#E5E5E5;
-  }
-  *{box-sizing:border-box;}
-  body{
-    margin:0;
-    font-family:'Segoe UI', system-ui, -apple-system, sans-serif;
-    background:var(--bg);
-    color:var(--ink);
-    padding:20px;
-  }
-  h1,h2,h3{margin:0;}
-  .topbar{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    flex-wrap:wrap;
-    gap:12px;
-    margin-bottom:20px;
-  }
-  .brand{
-    display:flex;
-    align-items:center;
-    gap:10px;
-  }
-  .brand .badge{
-    width:44px;height:44px;
-    background:var(--green);
-    border-radius:14px;
-    display:flex;align-items:center;justify-content:center;
-    font-size:22px;
-    box-shadow:0 4px 0 var(--green-dark);
-  }
-  .brand h1{
-    font-size:22px;
-    font-weight:800;
-    letter-spacing:.3px;
-  }
-  .brand p{margin:0;font-size:12px;color:var(--grey);font-weight:600;}
-  .clock{
-    background:var(--card);
-    border:2px solid var(--line);
-    border-radius:16px;
-    padding:8px 16px;
-    font-weight:700;
-    font-size:14px;
-    display:flex;
-    gap:10px;
-    align-items:center;
-  }
-  .dot{
-    width:10px;height:10px;border-radius:50%;
-    background:var(--green);
-    box-shadow:0 0 0 4px rgba(88,204,2,.2);
-    animation:pulse 1.6s infinite;
-  }
-  @keyframes pulse{
-    0%,100%{opacity:1;} 50%{opacity:.4;}
+  :root {
+    --bg: #07111f;
+    --bg-soft: #0e1c31;
+    --panel: rgba(11, 24, 43, 0.84);
+    --panel-strong: rgba(13, 28, 50, 0.96);
+    --glass: rgba(255, 255, 255, 0.09);
+    --line: rgba(255, 255, 255, 0.14);
+    --line-strong: rgba(255, 255, 255, 0.24);
+    --text: #f4f8ff;
+    --muted: #9eb0c9;
+    --cyan: #35d7ff;
+    --blue: #5f8cff;
+    --purple: #a975ff;
+    --green: #39e58c;
+    --yellow: #ffd166;
+    --orange: #ff9f43;
+    --red: #ff5c7a;
+    --shadow: 0 24px 80px rgba(0, 0, 0, 0.38);
+    --room-wall: #1d314d;
+    --drawing-floor: #d7c1a0;
+    --work-floor: #c59c68;
+    --tile-floor: #d9dce0;
   }
 
-  .stats-row{
-    display:grid;
-    grid-template-columns:repeat(auto-fit, minmax(180px,1fr));
-    gap:14px;
-    margin-bottom:22px;
-  }
-  .stat-card{
-    background:var(--card);
-    border-radius:18px;
-    padding:16px 18px;
-    border:2px solid var(--line);
-    border-bottom:5px solid var(--line);
-    position:relative;
-    overflow:hidden;
-  }
-  .stat-card.total{border-bottom-color:var(--blue-dark);}
-  .stat-card .label{font-size:12px;font-weight:700;color:var(--grey);text-transform:uppercase;letter-spacing:.5px;}
-  .stat-card .value{font-size:28px;font-weight:800;margin-top:4px;}
-  .stat-card .sub{font-size:12px;color:var(--grey);margin-top:2px;font-weight:600;}
-  .stat-card .icon{position:absolute;right:14px;top:14px;font-size:26px;opacity:.9;}
+  * { box-sizing: border-box; }
 
-  .layout{
-    display:grid;
-    grid-template-columns:2fr 1fr;
-    gap:18px;
-  }
-  @media (max-width:900px){ .layout{grid-template-columns:1fr;} }
-
-  .panel{
-    background:var(--card);
-    border-radius:20px;
-    border:2px solid var(--line);
-    padding:18px;
-  }
-  .panel h2{
-    font-size:16px;
-    font-weight:800;
-    margin-bottom:14px;
-    display:flex;
-    align-items:center;
-    gap:8px;
+  body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: var(--text);
+    background:
+      radial-gradient(circle at 12% 8%, rgba(53, 215, 255, 0.24), transparent 32rem),
+      radial-gradient(circle at 88% 10%, rgba(169, 117, 255, 0.20), transparent 34rem),
+      linear-gradient(135deg, #06101d 0%, #0b1424 46%, #11192a 100%);
+    overflow-x: hidden;
   }
 
-  .rooms{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
-    gap:14px;
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.028) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.028) 1px, transparent 1px);
+    background-size: 42px 42px;
+    mask-image: linear-gradient(to bottom, rgba(0,0,0,0.75), transparent 88%);
   }
-  .room-card{
-    border:2px solid var(--line);
-    border-radius:16px;
-    padding:14px;
-    background:#FBFCFE;
-  }
-  .room-head{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:10px;
-  }
-  .room-head .name{font-weight:800;font-size:14px;}
-  .room-head .power-badge{
-    font-size:11px;font-weight:700;
-    background:var(--yellow);
-    color:#5B4600;
-    padding:3px 9px;
-    border-radius:10px;
-  }
-  .device-grid{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:8px;
-  }
-  .device{
-    display:flex;
-    align-items:center;
-    gap:8px;
-    padding:8px;
-    border-radius:12px;
-    background:#F0F2F5;
-    font-size:12px;
-    font-weight:700;
-    transition:.3s;
-  }
-  .device.on{
-    background:#E9FBD8;
-  }
-  .device .icon{
-    font-size:16px;
-    width:20px;
-    text-align:center;
-  }
-  .device.on.fan .icon{
-    animation:spin 1s linear infinite;
-  }
-  .device.on.light .icon{
-    filter:drop-shadow(0 0 6px #FFD64D);
-  }
-  @keyframes spin{ from{transform:rotate(0);} to{transform:rotate(360deg);} }
-  .device .state-dot{
-    width:8px;height:8px;border-radius:50%;
-    margin-left:auto;
-    background:var(--grey);
-  }
-  .device.on .state-dot{ background:var(--green); }
 
-  .power-summary{
-    margin-top:14px;
-  }
-  .bar-row{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    margin-bottom:10px;
-    font-size:12px;
-    font-weight:700;
-  }
-  .bar-row .rname{width:90px;flex-shrink:0;color:var(--ink);}
-  .bar-track{
-    flex:1;
-    height:12px;
-    background:#EEF1F4;
-    border-radius:8px;
-    overflow:hidden;
-  }
-  .bar-fill{
-    height:100%;
-    background:linear-gradient(90deg,var(--blue),var(--green));
-    border-radius:8px;
-    transition:width .5s ease;
-  }
-  .bar-row .wval{width:56px;text-align:right;color:var(--grey);}
+  button, input, select { font: inherit; }
 
-  .alerts{
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-    max-height:520px;
-    overflow-y:auto;
+  .app {
+    width: min(1520px, calc(100% - 36px));
+    margin: 0 auto;
+    padding: 28px 0 36px;
+    position: relative;
+    z-index: 1;
   }
-  .alert-item{
-    border-radius:14px;
-    padding:10px 12px;
-    font-size:12px;
-    font-weight:600;
-    display:flex;
-    gap:10px;
-    align-items:flex-start;
-    border:2px solid transparent;
-  }
-  .alert-item.warn{
-    background:#FFF4E0;
-    border-color:#FFD98A;
-    color:#8A5A00;
-  }
-  .alert-item.danger{
-    background:#FFE7E7;
-    border-color:#FFB3B3;
-    color:#A31F1F;
-  }
-  .alert-item .emoji{font-size:16px;}
-  .alert-item .time{
-    display:block;
-    font-size:10px;
-    opacity:.7;
-    margin-top:2px;
-    font-weight:700;
-  }
-  .no-alerts{
-    text-align:center;
-    padding:30px 10px;
-    color:var(--grey);
-    font-weight:700;
-    font-size:13px;
-  }
-  .no-alerts .emoji{font-size:34px;display:block;margin-bottom:8px;}
 
-  .footer-note{
-    margin-top:18px;
-    text-align:center;
-    font-size:11px;
-    color:var(--grey);
-    font-weight:600;
+  .hero {
+    display: grid;
+    grid-template-columns: minmax(280px, 1.35fr) minmax(260px, 0.65fr);
+    gap: 18px;
+    align-items: stretch;
+    margin-bottom: 18px;
   }
-  .streak-pill{
-    background:var(--purple);
-    color:#fff;
-    border-radius:10px;
-    padding:3px 9px;
-    font-size:11px;
-    font-weight:700;
+
+  @media (max-width: 980px) {
+    .hero { grid-template-columns: 1fr; }
+  }
+
+  .hero-card,
+  .glass-card {
+    border: 1px solid var(--line);
+    border-radius: 28px;
+    background: linear-gradient(145deg, rgba(255,255,255,0.12), rgba(255,255,255,0.045));
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(18px);
+  }
+
+  .hero-card {
+    padding: 24px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .hero-card::after {
+    content: "";
+    position: absolute;
+    width: 360px;
+    height: 360px;
+    border-radius: 999px;
+    right: -120px;
+    top: -130px;
+    background: radial-gradient(circle, rgba(53,215,255,0.26), transparent 66%);
+    pointer-events: none;
+  }
+
+  .brand-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: flex-start;
+    position: relative;
+    z-index: 2;
+  }
+
+  .brand {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+  }
+
+  .brand-mark {
+    width: 58px;
+    height: 58px;
+    display: grid;
+    place-items: center;
+    border-radius: 20px;
+    color: #05101e;
+    background: linear-gradient(135deg, var(--yellow), #fff2a6 48%, var(--cyan));
+    box-shadow: 0 14px 34px rgba(255, 209, 102, 0.24), inset 0 -4px 14px rgba(5,16,30,0.22);
+    font-size: 30px;
+  }
+
+  .eyebrow {
+    color: var(--cyan);
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    font-size: 12px;
+    font-weight: 800;
+    margin: 0 0 6px;
+  }
+
+  h1 {
+    font-size: clamp(30px, 4vw, 58px);
+    line-height: 0.98;
+    letter-spacing: -0.055em;
+    margin: 0;
+  }
+
+  .hero-copy {
+    max-width: 780px;
+    margin: 18px 0 0;
+    color: #d9e5f7;
+    font-size: clamp(15px, 1.25vw, 18px);
+    line-height: 1.6;
+    position: relative;
+    z-index: 2;
+  }
+
+  .status-stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 22px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 13px;
+    border-radius: 999px;
+    color: #eaf3ff;
+    background: rgba(255,255,255,0.10);
+    border: 1px solid var(--line);
+    font-weight: 800;
+    font-size: 13px;
+    white-space: nowrap;
+  }
+
+  .pulse {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 0 0 rgba(57, 229, 140, 0.55);
+    animation: pulse 1.8s infinite;
+  }
+
+  .pulse.offline {
+    background: var(--orange);
+    box-shadow: 0 0 0 0 rgba(255, 159, 67, 0.55);
+  }
+
+  @keyframes pulse {
+    70% { box-shadow: 0 0 0 11px rgba(57, 229, 140, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(57, 229, 140, 0); }
+  }
+
+  .control-card {
+    padding: 22px;
+    display: grid;
+    gap: 16px;
+  }
+
+  .clock {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .clock .time {
+    font-size: clamp(30px, 4vw, 46px);
+    font-weight: 900;
+    letter-spacing: -0.05em;
+  }
+
+  .clock .date {
+    color: var(--muted);
+    font-weight: 700;
+    font-size: 13px;
+    margin-top: 3px;
+  }
+
+  .mode-badge {
+    border-radius: 18px;
+    padding: 12px 14px;
+    background: rgba(57, 229, 140, 0.12);
+    border: 1px solid rgba(57, 229, 140, 0.34);
+    color: #c8ffdf;
+    font-weight: 900;
+    text-align: center;
+  }
+
+  .mode-badge.after {
+    background: rgba(255, 92, 122, 0.13);
+    border-color: rgba(255, 92, 122, 0.42);
+    color: #ffd6de;
+  }
+
+  .backend-config {
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    background: rgba(0,0,0,0.18);
+    padding: 12px;
+  }
+
+  .backend-config label {
+    display: block;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 8px;
+  }
+
+  .backend-config .config-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 8px;
+  }
+
+  .backend-config input {
+    width: 100%;
+    min-width: 0;
+    color: var(--text);
+    background: rgba(255,255,255,0.08);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 10px 12px;
+    outline: none;
+  }
+
+  .backend-config input:focus {
+    border-color: rgba(53, 215, 255, 0.72);
+    box-shadow: 0 0 0 3px rgba(53, 215, 255, 0.12);
+  }
+
+  .btn {
+    border: 0;
+    border-radius: 12px;
+    padding: 10px 13px;
+    color: #06101d;
+    background: linear-gradient(135deg, var(--cyan), #8de9ff);
+    font-weight: 900;
+    cursor: pointer;
+    transition: transform .18s ease, filter .18s ease;
+  }
+
+  .btn:hover { transform: translateY(-1px); filter: brightness(1.06); }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+
+  @media (max-width: 1080px) {
+    .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+
+  @media (max-width: 620px) {
+    .app { width: min(100% - 20px, 1520px); padding-top: 16px; }
+    .stats-grid { grid-template-columns: 1fr; }
+    .backend-config .config-row { grid-template-columns: 1fr; }
+  }
+
+  .stat-card {
+    position: relative;
+    overflow: hidden;
+    min-height: 138px;
+    padding: 18px;
+    border-radius: 24px;
+    background: linear-gradient(145deg, rgba(255,255,255,0.105), rgba(255,255,255,0.045));
+    border: 1px solid var(--line);
+    box-shadow: 0 18px 40px rgba(0,0,0,0.20);
+  }
+
+  .stat-card::after {
+    content: "";
+    position: absolute;
+    inset: auto -42px -52px auto;
+    width: 132px;
+    height: 132px;
+    border-radius: 50%;
+    background: var(--accent, rgba(53,215,255,0.22));
+    filter: blur(8px);
+    opacity: 0.54;
+  }
+
+  .stat-label {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+  }
+
+  .stat-value {
+    margin-top: 10px;
+    font-size: clamp(30px, 3vw, 42px);
+    line-height: 1;
+    font-weight: 950;
+    letter-spacing: -0.06em;
+  }
+
+  .stat-sub {
+    margin-top: 10px;
+    color: #c9d7eb;
+    font-size: 13px;
+    font-weight: 750;
+  }
+
+  .main-grid {
+    display: grid;
+    grid-template-columns: minmax(620px, 1.4fr) minmax(330px, 0.6fr);
+    gap: 18px;
+    align-items: start;
+  }
+
+  @media (max-width: 1180px) {
+    .main-grid { grid-template-columns: 1fr; }
+  }
+
+  .panel {
+    border: 1px solid var(--line);
+    border-radius: 28px;
+    background: var(--panel);
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(18px);
+    overflow: hidden;
+  }
+
+  .panel-header {
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    gap: 14px;
+    align-items: center;
+  }
+
+  .panel-title {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    font-size: 18px;
+    font-weight: 950;
+    letter-spacing: -0.02em;
+  }
+
+  .panel-kicker {
+    margin-top: 4px;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 760;
+  }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  .legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #dbe8f8;
+    background: rgba(255,255,255,0.075);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 7px 10px;
+    font-size: 12px;
+    font-weight: 800;
+  }
+
+  .layout-shell {
+    padding: 20px;
+  }
+
+  .office-plan {
+    position: relative;
+    aspect-ratio: 1.58 / 1;
+    min-height: 500px;
+    border-radius: 24px;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01)),
+      #101b2c;
+    border: 1px solid var(--line-strong);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06), 0 20px 70px rgba(0,0,0,0.30);
+    overflow: hidden;
+  }
+
+  .room {
+    position: absolute;
+    border: 7px solid var(--room-wall);
+    background-color: var(--tile-floor);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.28), inset 0 -60px 90px rgba(0,0,0,0.06);
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform .2s ease, border-color .2s ease, filter .2s ease;
+  }
+
+  .room::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    opacity: .35;
+    background-image:
+      linear-gradient(rgba(80, 82, 88, .16) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(80, 82, 88, .16) 1px, transparent 1px);
+    background-size: 36px 36px;
+    pointer-events: none;
+  }
+
+  .room.selected {
+    border-color: #46dcff;
+    filter: saturate(1.08) brightness(1.04);
+    transform: translateY(-2px);
+  }
+
+  .room.drawing {
+    left: 2.8%;
+    top: 5%;
+    width: 34%;
+    height: 63%;
+    background-color: var(--drawing-floor);
+  }
+
+  .room.work1 {
+    left: 36.8%;
+    top: 5%;
+    width: 29.6%;
+    height: 63%;
+  }
+
+  .room.work2 {
+    left: 66.4%;
+    top: 5%;
+    width: 30.8%;
+    height: 63%;
+    background-color: var(--work-floor);
+  }
+
+  .corridor {
+    position: absolute;
+    left: 2.8%;
+    right: 2.8%;
+    bottom: 5%;
+    height: 27%;
+    border: 7px solid var(--room-wall);
+    border-top: 0;
+    background:
+      linear-gradient(rgba(255,255,255,.08), rgba(255,255,255,.08)),
+      repeating-linear-gradient(90deg, #d7c3a3 0 44px, #ddcbae 44px 88px);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.24);
+  }
+
+  .entry-label {
+    position: absolute;
+    left: 49.5%;
+    bottom: 0.4%;
+    transform: translateX(-50%);
+    color: #08111f;
+    background: rgba(255,255,255,0.84);
+    border-radius: 999px;
+    padding: 5px 11px;
+    font-size: 11px;
+    font-weight: 950;
+    letter-spacing: 0.08em;
+  }
+
+  .door {
+    position: absolute;
+    width: 48px;
+    height: 48px;
+    border: 3px solid rgba(255,255,255,0.72);
+    border-left: 0;
+    border-bottom: 0;
+    border-radius: 0 48px 0 0;
+    pointer-events: none;
+  }
+
+  .door.drawing-door { left: 22%; bottom: 28%; transform: rotate(180deg); }
+  .door.work1-door { left: 39.5%; bottom: 28%; transform: rotate(180deg); }
+  .door.work2-door { left: 70%; bottom: 28%; transform: rotate(180deg); }
+  .door.entry-door { left: 50%; bottom: 5%; transform: translateX(-50%) rotate(270deg); }
+
+  .window {
+    position: absolute;
+    background: linear-gradient(90deg, rgba(115,229,255,.4), rgba(255,255,255,.82), rgba(115,229,255,.4));
+    border: 1px solid rgba(8,17,31,0.3);
+    border-radius: 999px;
+    box-shadow: 0 0 14px rgba(53,215,255,0.25);
+  }
+
+  .w-top { top: 5.4%; width: 12%; height: 7px; }
+  .w-left { left: 2.7%; top: 18%; width: 7px; height: 18%; }
+  .w-right { right: 2.7%; top: 36%; width: 7px; height: 18%; }
+
+  .room-label {
+    position: absolute;
+    z-index: 10;
+    left: 16px;
+    top: 14px;
+    color: rgba(7, 17, 31, 0.86);
+    font-weight: 950;
+    letter-spacing: -0.02em;
+    font-size: clamp(12px, 1vw, 15px);
+    text-transform: uppercase;
+  }
+
+  .room-power-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 6px;
+    border-radius: 999px;
+    padding: 5px 9px;
+    background: rgba(7,17,31,0.80);
+    color: #f5fbff;
+    font-size: 11px;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  .heat-ring {
+    position: absolute;
+    z-index: 2;
+    inset: 18%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 209, 102, var(--room-heat, 0.08)), transparent 64%);
+    pointer-events: none;
+    transition: opacity .4s ease;
+  }
+
+  .device-node {
+    --size: 42px;
+    position: absolute;
+    z-index: 8;
+    left: var(--x);
+    top: var(--y);
+    width: var(--size);
+    height: var(--size);
+    transform: translate(-50%, -50%);
+    border: 1px solid rgba(8,17,31,0.18);
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    background: rgba(7, 17, 31, 0.74);
+    color: rgba(255,255,255,0.52);
+    box-shadow: 0 10px 22px rgba(0,0,0,0.18);
+    transition: transform .18s ease, box-shadow .18s ease, color .18s ease, background .18s ease;
+  }
+
+  .device-node:hover,
+  .device-node.selected {
+    transform: translate(-50%, -50%) scale(1.1);
+    box-shadow: 0 16px 32px rgba(0,0,0,0.26), 0 0 0 5px rgba(53,215,255,0.16);
+  }
+
+  .device-node.on.light {
+    color: #fff4b2;
+    background: radial-gradient(circle, #fff5b7 0 22%, #ffd166 23% 48%, rgba(65,42,5,0.86) 49%);
+    box-shadow: 0 0 28px rgba(255, 209, 102, 0.85), 0 0 88px rgba(255, 209, 102, 0.36);
+  }
+
+  .device-node.light::before {
+    content: "";
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 3px solid currentColor;
+    background: rgba(255,255,255,0.12);
+  }
+
+  .device-node.fan {
+    color: #9fb1c9;
+  }
+
+  .device-node.fan::before,
+  .device-node.fan::after,
+  .fan-blade {
+    content: "";
+    position: absolute;
+    width: 6px;
+    height: 24px;
+    border-radius: 999px;
+    background: currentColor;
+    transform-origin: center 18px;
+  }
+
+  .device-node.fan::before { transform: rotate(0deg) translateY(-8px); }
+  .device-node.fan::after { transform: rotate(120deg) translateY(-8px); }
+  .fan-blade { transform: rotate(240deg) translateY(-8px); }
+
+  .device-node.on.fan {
+    color: #ecfbff;
+    background: radial-gradient(circle, rgba(236,251,255,.95) 0 12%, rgba(53,215,255,.76) 13% 42%, rgba(10,31,49,.88) 43%);
+    box-shadow: 0 0 26px rgba(53, 215, 255, 0.72), 0 0 70px rgba(53, 215, 255, 0.26);
+    animation: fanPulse 1.4s ease-in-out infinite;
+  }
+
+  .device-node.on.fan .fan-spin {
+    position: absolute;
+    inset: 8px;
+    animation: spin .72s linear infinite;
+  }
+
+  .device-node.off.fan .fan-spin {
+    position: absolute;
+    inset: 8px;
+  }
+
+  @keyframes fanPulse {
+    50% { box-shadow: 0 0 34px rgba(53, 215, 255, 0.86), 0 0 92px rgba(53, 215, 255, 0.36); }
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .device-tooltip {
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 8px);
+    transform: translateX(-50%);
+    min-width: 142px;
+    padding: 8px 10px;
+    border-radius: 12px;
+    color: #f6fbff;
+    background: rgba(5, 13, 24, 0.90);
+    border: 1px solid rgba(255,255,255,0.14);
+    pointer-events: none;
+    opacity: 0;
+    font-size: 11px;
+    font-weight: 800;
+    line-height: 1.45;
+    transition: opacity .16s ease, transform .16s ease;
+  }
+
+  .device-node:hover .device-tooltip {
+    opacity: 1;
+    transform: translateX(-50%) translateY(-2px);
+  }
+
+  .fixture {
+    position: absolute;
+    z-index: 4;
+    transform: translate(-50%, -50%);
+  }
+
+  .desk {
+    width: 74px;
+    height: 48px;
+    border-radius: 6px;
+    background: linear-gradient(135deg, #bc8a52, #e0b06d);
+    border: 2px solid rgba(82,50,19,0.30);
+    box-shadow: 0 7px 13px rgba(0,0,0,0.15);
+  }
+
+  .desk::before {
+    content: "";
+    position: absolute;
+    width: 30px;
+    height: 18px;
+    left: 22px;
+    top: 12px;
+    border-radius: 3px;
+    background: #1b2737;
+    box-shadow: 0 16px 0 #27384d, -18px 2px 0 -4px rgba(255,255,255,0.32);
+  }
+
+  .chair {
+    width: 36px;
+    height: 32px;
+    border-radius: 10px 10px 14px 14px;
+    background: linear-gradient(#2d3d50, #1a2533);
+    box-shadow: inset 0 -8px 0 rgba(0,0,0,0.18), 0 5px 9px rgba(0,0,0,0.16);
+  }
+
+  .sofa {
+    width: 58px;
+    height: 150px;
+    border-radius: 16px;
+    background: linear-gradient(90deg, #b49b79, #e0c9a9 52%, #a58b67);
+    box-shadow: inset 0 0 0 4px rgba(80,53,33,0.12), 0 8px 16px rgba(0,0,0,0.16);
+  }
+
+  .sofa::before {
+    content: "";
+    position: absolute;
+    inset: 13px 8px;
+    border-top: 2px solid rgba(80,53,33,.24);
+    border-bottom: 2px solid rgba(80,53,33,.24);
+  }
+
+  .coffee-table {
+    width: 60px;
+    height: 92px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #7a5837, #b78957);
+    border: 4px solid rgba(63,40,22,0.35);
+  }
+
+  .armchair {
+    width: 52px;
+    height: 54px;
+    border-radius: 16px 16px 12px 12px;
+    background: linear-gradient(135deg, #d5bd98, #a8906f);
+    transform: translate(-50%, -50%) rotate(-26deg);
+    box-shadow: inset 0 -8px 0 rgba(0,0,0,0.08), 0 8px 14px rgba(0,0,0,0.14);
+  }
+
+  .plant {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #3a7e40 0 18%, transparent 19%),
+      conic-gradient(from 0deg, #4fae53, #1f7a39, #62c45f, #2d8f41, #4fae53);
+    box-shadow: 0 5px 8px rgba(0,0,0,0.16);
+  }
+
+  .water {
+    width: 34px;
+    height: 58px;
+    border-radius: 10px;
+    background: linear-gradient(#73d6ff 0 38%, #d7f6ff 39% 100%);
+    border: 3px solid rgba(30,60,86,0.22);
+  }
+
+  .side-stack {
+    display: grid;
+    gap: 18px;
+  }
+
+  .room-list {
+    padding: 16px;
+    display: grid;
+    gap: 12px;
+  }
+
+  .room-card {
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    background: rgba(255,255,255,0.065);
+    padding: 14px;
+    cursor: pointer;
+    transition: border-color .2s ease, background .2s ease, transform .2s ease;
+  }
+
+  .room-card:hover,
+  .room-card.selected {
+    border-color: rgba(53,215,255,0.58);
+    background: rgba(53,215,255,0.10);
+    transform: translateY(-1px);
+  }
+
+  .room-card-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .room-name {
+    font-weight: 950;
+    letter-spacing: -0.02em;
+  }
+
+  .room-summary {
+    color: var(--muted);
+    margin-top: 5px;
+    font-size: 12px;
+    font-weight: 760;
+  }
+
+  .mini-meter {
+    margin-top: 12px;
+    height: 10px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.10);
+    overflow: hidden;
+  }
+
+  .mini-meter span {
+    display: block;
+    height: 100%;
+    width: var(--w);
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--green), var(--yellow), var(--red));
+    transition: width .35s ease;
+  }
+
+  .device-list {
+    padding: 16px;
+    display: grid;
+    gap: 10px;
+    max-height: 480px;
+    overflow: auto;
+  }
+
+  .device-row {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 11px;
+    align-items: center;
+    border: 1px solid var(--line);
+    border-radius: 17px;
+    padding: 11px;
+    background: rgba(255,255,255,0.055);
+    cursor: pointer;
+  }
+
+  .device-row.selected {
+    border-color: rgba(53,215,255,0.58);
+    background: rgba(53,215,255,0.10);
+  }
+
+  .row-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    background: rgba(255,255,255,0.08);
+  }
+
+  .device-row.on .row-icon {
+    background: rgba(57,229,140,0.14);
+    color: #bfffdc;
+  }
+
+  .row-title {
+    font-weight: 900;
+    font-size: 13px;
+  }
+
+  .row-meta {
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 720;
+    margin-top: 3px;
+  }
+
+  .state-chip {
+    border-radius: 999px;
+    padding: 6px 9px;
+    background: rgba(255,92,122,0.14);
+    color: #ffd8df;
+    border: 1px solid rgba(255,92,122,0.24);
+    font-size: 11px;
+    font-weight: 950;
+  }
+
+  .device-row.on .state-chip {
+    color: #c7ffdc;
+    background: rgba(57,229,140,0.14);
+    border-color: rgba(57,229,140,0.28);
+  }
+
+  .alerts {
+    padding: 16px;
+    display: grid;
+    gap: 10px;
+  }
+
+  .alert {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 10px;
+    padding: 12px;
+    border-radius: 17px;
+    background: rgba(255,209,102,0.12);
+    border: 1px solid rgba(255,209,102,0.28);
+  }
+
+  .alert.danger {
+    background: rgba(255,92,122,0.13);
+    border-color: rgba(255,92,122,0.32);
+  }
+
+  .alert-title {
+    font-weight: 900;
+    font-size: 13px;
+    line-height: 1.35;
+  }
+
+  .alert-time {
+    color: var(--muted);
+    margin-top: 4px;
+    font-size: 11px;
+    font-weight: 760;
+  }
+
+  .empty {
+    text-align: center;
+    color: var(--muted);
+    padding: 28px 14px;
+    font-weight: 800;
+  }
+
+  .empty strong {
+    display: block;
+    color: #eaf4ff;
+    font-size: 28px;
+    margin-bottom: 6px;
+  }
+
+  .detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    padding: 16px;
+  }
+
+  .detail-tile {
+    border-radius: 16px;
+    border: 1px solid var(--line);
+    background: rgba(255,255,255,0.06);
+    padding: 12px;
+  }
+
+  .detail-tile b {
+    display: block;
+    color: var(--muted);
+    text-transform: uppercase;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    margin-bottom: 7px;
+  }
+
+  .detail-tile span {
+    font-size: 15px;
+    font-weight: 950;
+  }
+
+  .flow-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    padding: 18px;
+  }
+
+  .flow-step {
+    position: relative;
+    min-height: 136px;
+    border: 1px solid var(--line);
+    border-radius: 22px;
+    background: rgba(255,255,255,0.062);
+    padding: 16px;
+  }
+
+  .flow-step:not(:last-child)::after {
+    content: ">";
+    position: absolute;
+    right: -12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 24px;
+    height: 24px;
+    display: grid;
+    place-items: center;
+    border-radius: 999px;
+    color: #06101d;
+    background: var(--cyan);
+    font-weight: 950;
+    z-index: 2;
+  }
+
+  .flow-icon {
+    font-size: 28px;
+    margin-bottom: 14px;
+  }
+
+  .flow-step h3 {
+    margin: 0 0 7px;
+    font-size: 14px;
+    letter-spacing: -0.01em;
+  }
+
+  .flow-step p {
+    color: var(--muted);
+    margin: 0;
+    font-size: 12px;
+    font-weight: 720;
+    line-height: 1.45;
+  }
+
+  @media (max-width: 1100px) {
+    .flow-grid { grid-template-columns: 1fr; }
+    .flow-step:not(:last-child)::after {
+      content: "v";
+      right: 50%;
+      top: auto;
+      bottom: -12px;
+      transform: translateX(50%);
+    }
+  }
+
+  .schematic {
+    padding: 18px;
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 16px;
+  }
+
+  @media (max-width: 900px) {
+    .schematic { grid-template-columns: 1fr; }
+    .office-plan { min-height: 680px; aspect-ratio: auto; }
+  }
+
+  .circuit-board {
+    min-height: 280px;
+    border-radius: 24px;
+    border: 1px solid rgba(57,229,140,0.26);
+    background:
+      radial-gradient(circle at 18% 18%, rgba(57,229,140,0.14), transparent 18rem),
+      linear-gradient(135deg, rgba(9,54,38,0.86), rgba(8,26,28,0.92));
+    position: relative;
+    overflow: hidden;
+  }
+
+  .wire {
+    position: absolute;
+    height: 4px;
+    border-radius: 999px;
+    background: var(--wire, var(--yellow));
+    transform-origin: left center;
+    box-shadow: 0 0 12px color-mix(in srgb, var(--wire, var(--yellow)) 50%, transparent);
+  }
+
+  .part {
+    position: absolute;
+    border: 1px solid rgba(255,255,255,0.22);
+    border-radius: 16px;
+    background: rgba(3, 12, 15, 0.70);
+    box-shadow: 0 12px 26px rgba(0,0,0,0.24);
+    padding: 10px;
+    text-align: center;
+    font-weight: 950;
+    font-size: 12px;
+  }
+
+  .part small {
+    display: block;
+    color: var(--muted);
+    font-size: 10px;
+    margin-top: 4px;
+    font-weight: 780;
+  }
+
+  .schematic-notes {
+    display: grid;
+    gap: 10px;
+  }
+
+  .note {
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    background: rgba(255,255,255,0.06);
+    padding: 12px;
+    color: #d9e6f6;
+    font-size: 13px;
+    line-height: 1.5;
+    font-weight: 720;
+  }
+
+  .footer {
+    margin-top: 18px;
+    color: var(--muted);
+    text-align: center;
+    font-size: 12px;
+    font-weight: 750;
   }
 </style>
 </head>
 <body>
-
-<div class="topbar">
-  <div class="brand">
-    <div class="badge">⚡</div>
-    <div>
-      <h1>OfficeQuest</h1>
-      <p>Live device &amp; power monitor</p>
+<main class="app">
+  <section class="hero">
+    <div class="hero-card">
+      <div class="brand-row">
+        <div class="brand">
+          <div class="brand-mark">⚡</div>
+          <div>
+            <p class="eyebrow">OfficeQuest hackathon demo</p>
+            <h1>Live Energy Command Center</h1>
+          </div>
+        </div>
+        <div class="pill"><span class="pulse" id="connectionPulse"></span><span id="connectionLabel">Connecting</span></div>
+      </div>
+      <p class="hero-copy">
+        Premium top-view dashboard for three office rooms: Drawing Room, Work Room 1, and Work Room 2.
+        Lights glow, fans spin, power totals update live, and the same backend shape can feed Discord bot replies.
+      </p>
+      <div class="status-stack">
+        <span class="pill">15 fixed devices</span>
+        <span class="pill">2 fans + 3 lights per room</span>
+        <span class="pill">Backend-ready API adapter</span>
+        <span class="pill">Simulator fallback included</span>
+      </div>
     </div>
-  </div>
-  <div class="clock">
-    <span class="dot"></span>
-    <span id="clockTime">--:--:--</span>
-    <span class="streak-pill" id="hoursBadge">Office Hours</span>
-  </div>
-</div>
 
-<div class="stats-row" id="statsRow"></div>
+    <aside class="glass-card control-card">
+      <div class="clock">
+        <div>
+          <div class="time" id="clockTime">--:--:--</div>
+          <div class="date" id="clockDate">Loading local time</div>
+        </div>
+        <div class="mode-badge" id="hoursBadge">Office Hours</div>
+      </div>
+      <div class="backend-config">
+        <label for="backendUrl">Backend status endpoint</label>
+        <div class="config-row">
+          <input id="backendUrl" value="http://localhost:4000" aria-label="Backend URL">
+          <button class="btn" id="saveBackend">Connect</button>
+        </div>
+      </div>
+      <div class="pill" id="lastSync">Waiting for first sync</div>
+    </aside>
+  </section>
 
-<div class="layout">
-  <div class="panel">
-    <h2>🏢 Devices by Room</h2>
-    <div class="rooms" id="roomsWrap"></div>
-    <div class="power-summary">
-      <h2 style="margin-top:18px;">🔋 Per-Room Power Draw</h2>
-      <div id="powerBars"></div>
+  <section class="stats-grid" id="statsGrid" aria-live="polite"></section>
+
+  <section class="main-grid">
+    <div class="panel">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">🏢 Interactive office layout</div>
+          <div class="panel-kicker">Click any room or device to inspect live state and power draw.</div>
+        </div>
+        <div class="legend">
+          <span class="legend-item">💡 Light</span>
+          <span class="legend-item">🌀 Fan</span>
+          <span class="legend-item">🟢 On</span>
+          <span class="legend-item">⚫ Off</span>
+        </div>
+      </div>
+
+      <div class="layout-shell">
+        <div class="office-plan" id="officePlan">
+          <div class="corridor"></div>
+          <div class="entry-label">ENTRY</div>
+          <div class="door drawing-door"></div>
+          <div class="door work1-door"></div>
+          <div class="door work2-door"></div>
+          <div class="door entry-door"></div>
+          <div class="window w-top" style="left: 9%;"></div>
+          <div class="window w-top" style="left: 47%;"></div>
+          <div class="window w-top" style="left: 79%;"></div>
+          <div class="window w-left"></div>
+          <div class="window w-right"></div>
+
+          <div class="room drawing" data-room="Drawing Room">
+            <div class="heat-ring"></div>
+            <div class="room-label">Drawing Room <div class="room-power-pill" data-room-power="Drawing Room">0 W</div></div>
+            <div class="fixture sofa" style="left: 14%; top: 45%;"></div>
+            <div class="fixture coffee-table" style="left: 42%; top: 52%;"></div>
+            <div class="fixture armchair" style="left: 18%; top: 79%;"></div>
+            <div class="fixture plant" style="left: 10%; top: 13%;"></div>
+            <div class="fixture plant" style="left: 85%; top: 82%;"></div>
+          </div>
+
+          <div class="room work1" data-room="Work Room 1">
+            <div class="heat-ring"></div>
+            <div class="room-label">Work Room 1 <div class="room-power-pill" data-room-power="Work Room 1">0 W</div></div>
+            <div class="fixture desk" style="left: 24%; top: 34%;"></div>
+            <div class="fixture chair" style="left: 24%; top: 49%;"></div>
+            <div class="fixture desk" style="left: 78%; top: 34%;"></div>
+            <div class="fixture chair" style="left: 78%; top: 49%;"></div>
+            <div class="fixture desk" style="left: 24%; top: 72%;"></div>
+            <div class="fixture chair" style="left: 24%; top: 87%;"></div>
+            <div class="fixture desk" style="left: 78%; top: 72%;"></div>
+            <div class="fixture chair" style="left: 78%; top: 87%;"></div>
+            <div class="fixture plant" style="left: 12%; top: 78%;"></div>
+          </div>
+
+          <div class="room work2" data-room="Work Room 2">
+            <div class="heat-ring"></div>
+            <div class="room-label">Work Room 2 <div class="room-power-pill" data-room-power="Work Room 2">0 W</div></div>
+            <div class="fixture desk" style="left: 24%; top: 34%;"></div>
+            <div class="fixture chair" style="left: 24%; top: 49%;"></div>
+            <div class="fixture desk" style="left: 78%; top: 34%;"></div>
+            <div class="fixture chair" style="left: 78%; top: 49%;"></div>
+            <div class="fixture desk" style="left: 24%; top: 72%;"></div>
+            <div class="fixture chair" style="left: 24%; top: 87%;"></div>
+            <div class="fixture desk" style="left: 78%; top: 72%;"></div>
+            <div class="fixture chair" style="left: 78%; top: 87%;"></div>
+            <div class="fixture plant" style="left: 88%; top: 38%;"></div>
+          </div>
+
+          <div class="fixture plant" style="left: 8%; top: 82%;"></div>
+          <div class="fixture plant" style="left: 88%; top: 81%;"></div>
+          <div class="fixture water" style="left: 94%; top: 88%;"></div>
+        </div>
+      </div>
     </div>
-  </div>
 
-  <div class="panel">
-    <h2>🔔 Active Alerts</h2>
-    <div class="alerts" id="alertsWrap"></div>
-  </div>
-</div>
+    <aside class="side-stack">
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">📍 Room health</div>
+            <div class="panel-kicker">Per-room consumption and running devices.</div>
+          </div>
+        </div>
+        <div class="room-list" id="roomList"></div>
+      </div>
 
-<div class="footer-note">Live from backend (simulated device layer) — polls every 3s · Office hours 9 AM–5 PM · 18 devices across 3 rooms</div>
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">🔎 Selected device</div>
+            <div class="panel-kicker" id="selectedHint">Choose a light or fan from the layout.</div>
+          </div>
+        </div>
+        <div class="detail-grid" id="detailGrid"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">🔔 Energy alerts</div>
+            <div class="panel-kicker">After-hours and high-usage warnings.</div>
+          </div>
+        </div>
+        <div class="alerts" id="alerts"></div>
+      </div>
+    </aside>
+  </section>
+
+  <section class="panel" style="margin-top: 18px;">
+    <div class="panel-header">
+      <div>
+        <div class="panel-title">🔄 High-level system flow</div>
+        <div class="panel-kicker">Non-Mermaid diagram for the final presentation: device state to dashboard and Discord bot.</div>
+      </div>
+    </div>
+    <div class="flow-grid">
+      <div class="flow-step">
+        <div class="flow-icon">💡🌀</div>
+        <h3>Office devices</h3>
+        <p>Each room has 2 fans and 3 lights with on/off state plus wattage.</p>
+      </div>
+      <div class="flow-step">
+        <div class="flow-icon">📟</div>
+        <h3>ESP32 / simulator</h3>
+        <p>Real hardware can sense relays/current; today the frontend or backend simulator emits the same shape.</p>
+      </div>
+      <div class="flow-step">
+        <div class="flow-icon">🧠</div>
+        <h3>Backend API</h3>
+        <p><code>/api/status</code> returns devices, room power, alerts, and office-hours state.</p>
+      </div>
+      <div class="flow-step">
+        <div class="flow-icon">🖥️</div>
+        <h3>Live dashboard</h3>
+        <p>Polls the backend every 3s and paints the interactive office layout.</p>
+      </div>
+      <div class="flow-step">
+        <div class="flow-icon">🤖</div>
+        <h3>Discord bot</h3>
+        <p>Uses the same backend data for <code>!status</code>, <code>!room</code>, and <code>!usage</code> replies.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" style="margin-top: 18px;">
+    <div class="panel-header">
+      <div>
+        <div class="panel-title">🔌 Hardware schematic concept</div>
+        <div class="panel-kicker">Representative one-room circuit that can be recreated in Wokwi/Tinkercad.</div>
+      </div>
+    </div>
+    <div class="schematic">
+      <div class="circuit-board" aria-label="Representative hardware schematic">
+        <div class="part" style="left: 6%; top: 30%; width: 122px;">ESP32<br><small>GPIO reads relays + current</small></div>
+        <div class="part" style="left: 38%; top: 13%; width: 104px;">Relay x5<br><small>isolated switching</small></div>
+        <div class="part" style="left: 70%; top: 10%; width: 116px;">Lights x3<br><small>15W each</small></div>
+        <div class="part" style="left: 70%; top: 52%; width: 116px;">Fans x2<br><small>60W each</small></div>
+        <div class="part" style="left: 37%; top: 58%; width: 122px;">ACS712<br><small>current sensor</small></div>
+        <div class="part" style="left: 7%; top: 72%; width: 118px;">5V supply<br><small>logic power</small></div>
+        <div class="wire" style="--wire:#ffd166; left: 25%; top: 39%; width: 20%; transform: rotate(-18deg);"></div>
+        <div class="wire" style="--wire:#35d7ff; left: 52%; top: 27%; width: 19%; transform: rotate(-9deg);"></div>
+        <div class="wire" style="--wire:#ff9f43; left: 52%; top: 67%; width: 19%; transform: rotate(4deg);"></div>
+        <div class="wire" style="--wire:#39e58c; left: 25%; top: 78%; width: 15%; transform: rotate(-22deg);"></div>
+        <div class="wire" style="--wire:#a975ff; left: 32%; top: 45%; width: 18%; transform: rotate(46deg);"></div>
+      </div>
+      <div class="schematic-notes">
+        <div class="note"><strong>Physical sense:</strong> ESP32 GPIO controls/reads a 5-channel relay module; relay contacts switch the AC line to each fan/light while the microcontroller remains low-voltage.</div>
+        <div class="note"><strong>Current sensing:</strong> An ACS712/CT clamp can sit on the room supply line to estimate total room load, then backend maps watts to each known device rating.</div>
+        <div class="note"><strong>Demo scope:</strong> One room is enough for Wokwi/Tinkercad; repeat the same relay + sensor block for the other rooms.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" style="margin-top: 18px;">
+    <div class="panel-header">
+      <div>
+        <div class="panel-title">📋 Device inventory</div>
+        <div class="panel-kicker">All simulated/live devices with last-changed timestamps.</div>
+      </div>
+    </div>
+    <div class="device-list" id="deviceList"></div>
+  </section>
+
+  <div class="footer">
+    OfficeQuest frontend is backend-ready: update the endpoint above or keep <code>DEFAULT_BACKEND_URL</code> in the script.
+    If backend is offline, simulator mode keeps the dashboard live for demos.
+  </div>
+</main>
 
 <script>
-// ---------- Live backend connection ----------
-// The dashboard no longer invents its own state. It polls the same
-// /api/status endpoint the Discord bot reads from, so both surfaces are
-// guaranteed to show the same reality.
-const BACKEND_URL = "http://localhost:4000";
-const POLL_MS = 3000; // matches the backend's own device-drift interval
-
 const ROOMS = ["Drawing Room", "Work Room 1", "Work Room 2"];
-const FAN_W = 60, LIGHT_W = 15;
+const ROOM_MAX_WATT = 2 * 60 + 3 * 15;
+const DEFAULT_BACKEND_URL = "http://localhost:4000";
+const POLL_MS = 3000;
+const SIMULATION_MS = 3200;
 
-let devices = [];
-let officeHoursFromServer = true;
-let alertsFromServer = [];
-let connectionOk = true;
+const DEVICE_POSITIONS = {
+  "Drawing Room": [
+    { type: "fan", idx: 1, x: "55%", y: "21%" },
+    { type: "fan", idx: 2, x: "55%", y: "69%" },
+    { type: "light", idx: 1, x: "31%", y: "20%" },
+    { type: "light", idx: 2, x: "82%", y: "20%" },
+    { type: "light", idx: 3, x: "56%", y: "84%" }
+  ],
+  "Work Room 1": [
+    { type: "fan", idx: 1, x: "52%", y: "21%" },
+    { type: "fan", idx: 2, x: "52%", y: "65%" },
+    { type: "light", idx: 1, x: "24%", y: "20%" },
+    { type: "light", idx: 2, x: "82%", y: "20%" },
+    { type: "light", idx: 3, x: "52%", y: "82%" }
+  ],
+  "Work Room 2": [
+    { type: "fan", idx: 1, x: "51%", y: "21%" },
+    { type: "fan", idx: 2, x: "51%", y: "65%" },
+    { type: "light", idx: 1, x: "22%", y: "20%" },
+    { type: "light", idx: 2, x: "82%", y: "20%" },
+    { type: "light", idx: 3, x: "51%", y: "82%" }
+  ]
+};
 
-function fmtTime(d){
-  return d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+let state = {
+  devices: buildInitialDevices(),
+  alerts: [],
+  power: null,
+  officeHours: isOfficeHours(),
+  source: "simulator",
+  connected: false,
+  selectedRoom: "Drawing Room",
+  selectedDeviceId: null,
+  lastSync: null,
+  backendUrl: localStorage.getItem("officequest.backendUrl") || DEFAULT_BACKEND_URL
+};
+
+const els = {
+  statsGrid: document.getElementById("statsGrid"),
+  officePlan: document.getElementById("officePlan"),
+  roomList: document.getElementById("roomList"),
+  deviceList: document.getElementById("deviceList"),
+  detailGrid: document.getElementById("detailGrid"),
+  alerts: document.getElementById("alerts"),
+  clockTime: document.getElementById("clockTime"),
+  clockDate: document.getElementById("clockDate"),
+  hoursBadge: document.getElementById("hoursBadge"),
+  connectionPulse: document.getElementById("connectionPulse"),
+  connectionLabel: document.getElementById("connectionLabel"),
+  lastSync: document.getElementById("lastSync"),
+  backendUrl: document.getElementById("backendUrl"),
+  saveBackend: document.getElementById("saveBackend"),
+  selectedHint: document.getElementById("selectedHint")
+};
+
+els.backendUrl.value = state.backendUrl;
+
+function buildInitialDevices() {
+  const now = Date.now();
+  return ROOMS.flatMap((room, roomIndex) => {
+    const devices = [];
+    for (let i = 1; i <= 2; i++) {
+      devices.push({
+        id: slug(`${room}-fan-${i}`),
+        room,
+        type: "fan",
+        label: `Fan ${i}`,
+        watt: 60,
+        on: (roomIndex + i) % 2 === 0,
+        lastChanged: now - (roomIndex * 27 + i * 14) * 60 * 1000
+      });
+    }
+    for (let i = 1; i <= 3; i++) {
+      devices.push({
+        id: slug(`${room}-light-${i}`),
+        room,
+        type: "light",
+        label: `Light ${i}`,
+        watt: 15,
+        on: (roomIndex + i) % 3 !== 0,
+        lastChanged: now - (roomIndex * 21 + i * 9) * 60 * 1000
+      });
+    }
+    return devices;
+  });
 }
-function fmtShort(ts){
-  const d = new Date(ts);
-  return d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+
+function slug(value) {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
 
-// The backend already computes office-hours, alerts, and power totals —
-// we just render what it sends. Alert objects use `message`; the local
-// alert-card renderer expects `text`, so map that field on the way in.
-function normalizeAlert(a){
+function isOfficeHours(date = new Date()) {
+  const hour = date.getHours();
+  return hour >= 9 && hour < 17;
+}
+
+function normalizeDevice(raw) {
+  const type = raw.type || (String(raw.label || raw.id).toLowerCase().includes("fan") ? "fan" : "light");
+  const fallbackWatt = type === "fan" ? 60 : 15;
+  const on = typeof raw.on === "boolean" ? raw.on : raw.status === "on" || raw.status === true;
   return {
-    level: a.level,
-    emoji: a.level === "danger" ? "⚠️" : "⏱️",
-    text: a.message,
-    ts: a.ts,
+    id: raw.id || slug(`${raw.room}-${raw.label || type}`),
+    room: raw.room,
+    type,
+    label: raw.label || `${type[0].toUpperCase()}${type.slice(1)}`,
+    watt: Number(raw.watt ?? raw.powerDraw ?? raw.power ?? fallbackWatt),
+    on,
+    lastChanged: Number(raw.lastChanged || Date.parse(raw.last_changed || raw.updatedAt || raw.updated_at) || Date.now())
   };
 }
 
-async function fetchStatus(){
+function normalizeStatus(payload) {
+  const devices = Array.isArray(payload) ? payload : payload.devices || [];
+  return {
+    devices: devices.map(normalizeDevice).filter((d) => ROOMS.includes(d.room)),
+    alerts: (payload.alerts || []).map((alert) => ({
+      level: alert.level || "warn",
+      message: alert.message || alert.text || "Energy event detected.",
+      ts: Number(alert.ts || alert.timestamp || Date.now())
+    })),
+    power: payload.power || null,
+    officeHours: typeof payload.officeHours === "boolean" ? payload.officeHours : isOfficeHours()
+  };
+}
+
+async function fetchBackendStatus() {
+  const url = state.backendUrl.replace(/\/$/, "");
+  const response = await fetch(`${url}/api/status`, { cache: "no-store" });
+  if (!response.ok) throw new Error(`Backend responded ${response.status}`);
+  return normalizeStatus(await response.json());
+}
+
+async function sync() {
   try {
-    const res = await fetch(`${BACKEND_URL}/api/status`);
-    if(!res.ok) throw new Error(`Backend responded ${res.status}`);
-    const status = await res.json();
-    devices = status.devices;
-    officeHoursFromServer = status.officeHours;
-    alertsFromServer = (status.alerts || []).map(normalizeAlert);
-    connectionOk = true;
-  } catch(err){
-    console.error("Failed to reach backend:", err.message);
-    connectionOk = false;
+    const next = await fetchBackendStatus();
+    if (next.devices.length) {
+      state.devices = next.devices;
+      state.alerts = next.alerts;
+      state.power = next.power;
+      state.officeHours = next.officeHours;
+      state.source = "backend";
+      state.connected = true;
+      state.lastSync = Date.now();
+    }
+  } catch (error) {
+    state.connected = false;
+    state.source = "simulator";
+    state.officeHours = isOfficeHours();
+    state.alerts = buildAlerts(state.devices, state.officeHours);
+    state.power = null;
   }
+  ensureSelection();
   render();
 }
 
-function render(){
-  const now = new Date();
-  document.getElementById("clockTime").textContent = fmtTime(now);
-  const officeHrs = officeHoursFromServer;
-  const hoursBadge = document.getElementById("hoursBadge");
-  hoursBadge.textContent = officeHrs ? "Office Hours" : "After Hours";
-  hoursBadge.style.background = officeHrs ? "var(--purple)" : "var(--red)";
-
-  // Nothing to render yet (first paint, before the initial fetch resolves)
-  // or the backend is unreachable — show a clear state instead of a blank
-  // or stale-looking dashboard.
-  if(devices.length === 0){
-    document.getElementById("statsRow").innerHTML = "";
-    document.getElementById("roomsWrap").innerHTML = `<div class="no-alerts"><span class="emoji">${connectionOk ? "⏳" : "🔌"}</span>${connectionOk ? "Connecting to backend…" : `Can't reach backend at ${BACKEND_URL}. Is server.js running?`}</div>`;
-    document.getElementById("powerBars").innerHTML = "";
-    document.getElementById("alertsWrap").innerHTML = "";
-    return;
+function simulateTick() {
+  if (state.connected) return;
+  const index = Math.floor(Math.random() * state.devices.length);
+  const chosen = state.devices[index];
+  const weightedChance = chosen.room === "Drawing Room" ? 0.28 : 0.38;
+  if (Math.random() < weightedChance) {
+    state.devices = state.devices.map((device, i) => i === index
+      ? { ...device, on: !device.on, lastChanged: Date.now() }
+      : device
+    );
   }
+  state.officeHours = isOfficeHours();
+  state.alerts = buildAlerts(state.devices, state.officeHours);
+  ensureSelection();
+  render();
+}
 
-  // totals
-  const totalWatt = devices.filter(d=>d.on).reduce((s,d)=>s+d.watt,0);
-  const onCount = devices.filter(d=>d.on).length;
-  const estKwh = (totalWatt/1000 * ((now.getHours()+now.getMinutes()/60))).toFixed(1);
+function buildAlerts(devices, officeHours) {
+  const alerts = [];
+  const now = Date.now();
+  if (!officeHours) {
+    devices.filter((device) => device.on).slice(0, 6).forEach((device) => {
+      alerts.push({
+        level: "danger",
+        message: `${device.label} in ${device.room} is still ON after office hours.`,
+        ts: now
+      });
+    });
+  }
+  ROOMS.forEach((room) => {
+    const roomDevices = devices.filter((device) => device.room === room);
+    const watt = roomPower(room);
+    if (watt >= ROOM_MAX_WATT * 0.75) {
+      alerts.push({
+        level: "warn",
+        message: `${room} is using ${watt}W, close to full load for that room.`,
+        ts: now
+      });
+    }
+    const allOn = roomDevices.length && roomDevices.every((device) => device.on);
+    if (allOn) {
+      alerts.push({
+        level: "warn",
+        message: `${room} has every light and fan running.`,
+        ts: now
+      });
+    }
+  });
+  return alerts;
+}
 
-  document.getElementById("statsRow").innerHTML = `
-    <div class="stat-card total">
-      <div class="icon">⚡</div>
-      <div class="label">Total Power Now</div>
-      <div class="value">${totalWatt} W</div>
-      <div class="sub">${onCount} / ${devices.length} devices ON</div>
-    </div>
-    <div class="stat-card">
-      <div class="icon">📈</div>
-      <div class="label">Est. Usage Today</div>
-      <div class="value">${estKwh} kWh</div>
-      <div class="sub">Based on current draw</div>
-    </div>
-    <div class="stat-card">
-      <div class="icon">🌀</div>
-      <div class="label">Fans Running</div>
-      <div class="value">${devices.filter(d=>d.type==='fan'&&d.on).length} / 6</div>
-      <div class="sub">${FAN_W}W each</div>
-    </div>
-    <div class="stat-card">
-      <div class="icon">💡</div>
-      <div class="label">Lights On</div>
-      <div class="value">${devices.filter(d=>d.type==='light'&&d.on).length} / 9</div>
-      <div class="sub">${LIGHT_W}W each</div>
-    </div>
-  `;
-
-  // rooms
-  const roomsWrap = document.getElementById("roomsWrap");
-  roomsWrap.innerHTML = ROOMS.map(room=>{
-    const roomDevices = devices.filter(d=>d.room===room);
-    const roomWatt = roomDevices.filter(d=>d.on).reduce((s,d)=>s+d.watt,0);
-    const devicesHtml = roomDevices.map(d=>`
-      <div class="device ${d.type} ${d.on?'on':''}" title="Last changed ${fmtShort(d.lastChanged)}">
-        <span class="icon">${d.type==='fan' ? '🌀' : '💡'}</span>
-        <span>${d.label}</span>
-        <span class="state-dot"></span>
-      </div>
-    `).join("");
-    return `
-      <div class="room-card">
-        <div class="room-head">
-          <span class="name">${room}</span>
-          <span class="power-badge">${roomWatt} W</span>
-        </div>
-        <div class="device-grid">${devicesHtml}</div>
-      </div>
-    `;
-  }).join("");
-
-  // power bars
-  const maxRoomWatt = 2*FAN_W + 3*LIGHT_W; // max possible per room
-  document.getElementById("powerBars").innerHTML = ROOMS.map(room=>{
-    const roomDevices = devices.filter(d=>d.room===room);
-    const roomWatt = roomDevices.filter(d=>d.on).reduce((s,d)=>s+d.watt,0);
-    const pct = Math.round((roomWatt/maxRoomWatt)*100);
-    return `
-      <div class="bar-row">
-        <span class="rname">${room}</span>
-        <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
-        <span class="wval">${roomWatt}W</span>
-      </div>
-    `;
-  }).join("");
-
-  // alerts
-  const alerts = alertsFromServer;
-  const alertsWrap = document.getElementById("alertsWrap");
-  if(alerts.length===0){
-    alertsWrap.innerHTML = `<div class="no-alerts"><span class="emoji">✅</span>All clear — nothing looks unusual right now.</div>`;
-  } else {
-    alertsWrap.innerHTML = alerts.map(a=>`
-      <div class="alert-item ${a.level}">
-        <span class="emoji">${a.emoji}</span>
-        <div>
-          ${a.text}
-          <span class="time">Flagged at ${fmtShort(a.ts)}</span>
-        </div>
-      </div>
-    `).join("");
+function ensureSelection() {
+  if (!ROOMS.includes(state.selectedRoom)) state.selectedRoom = ROOMS[0];
+  if (state.selectedDeviceId && !state.devices.some((d) => d.id === state.selectedDeviceId)) {
+    state.selectedDeviceId = null;
   }
 }
 
-// Initial paint (shows the "connecting…" state), then poll the shared
-// backend on the same cadence it mutates device state internally.
+function totalPower() {
+  if (state.power && Number.isFinite(Number(state.power.totalWatt))) return Number(state.power.totalWatt);
+  return state.devices.filter((device) => device.on).reduce((sum, device) => sum + device.watt, 0);
+}
+
+function roomPower(room) {
+  const backendRoom = state.power?.byRoom?.find?.((entry) => entry.room === room);
+  if (backendRoom && Number.isFinite(Number(backendRoom.watt))) return Number(backendRoom.watt);
+  return state.devices.filter((device) => device.room === room && device.on).reduce((sum, device) => sum + device.watt, 0);
+}
+
+function kwhToday() {
+  if (state.power && Number.isFinite(Number(state.power.estimatedKwhToday))) {
+    return Number(state.power.estimatedKwhToday).toFixed(2);
+  }
+  const now = new Date();
+  const hoursElapsed = now.getHours() + now.getMinutes() / 60;
+  return ((totalPower() / 1000) * hoursElapsed).toFixed(2);
+}
+
+function moneyEstimate() {
+  const takaPerKwh = 12.5;
+  return Math.round(Number(kwhToday()) * takaPerKwh);
+}
+
+function fmtTime(date = new Date()) {
+  return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+}
+
+function fmtDate(date = new Date()) {
+  return date.toLocaleDateString([], { weekday: "long", month: "short", day: "numeric", year: "numeric" });
+}
+
+function relativeTime(ts) {
+  const seconds = Math.max(1, Math.floor((Date.now() - Number(ts)) / 1000));
+  if (seconds < 60) return `${seconds}s ago`;
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  return `${Math.floor(hours / 24)}d ago`;
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function renderClock() {
+  const now = new Date();
+  els.clockTime.textContent = fmtTime(now);
+  els.clockDate.textContent = fmtDate(now);
+  els.hoursBadge.textContent = state.officeHours ? "Office Hours" : "After Hours";
+  els.hoursBadge.classList.toggle("after", !state.officeHours);
+}
+
+function renderConnection() {
+  els.connectionPulse.classList.toggle("offline", !state.connected);
+  els.connectionLabel.textContent = state.connected ? "Backend live" : "Simulator mode";
+  els.lastSync.textContent = state.connected && state.lastSync
+    ? `Synced ${relativeTime(state.lastSync)} from backend`
+    : `Backend offline - demo data changing every ${Math.round(SIMULATION_MS / 1000)}s`;
+}
+
+function renderStats() {
+  const onDevices = state.devices.filter((device) => device.on);
+  const fansOn = onDevices.filter((device) => device.type === "fan").length;
+  const lightsOn = onDevices.filter((device) => device.type === "light").length;
+  const peak = ROOMS.length * ROOM_MAX_WATT;
+  const loadPct = Math.round((totalPower() / peak) * 100);
+
+  els.statsGrid.innerHTML = [
+    statCard("Total power now", `${totalPower()} W`, `${onDevices.length} / ${state.devices.length} devices running`, "rgba(53,215,255,0.28)"),
+    statCard("Estimated usage", `${kwhToday()} kWh`, `Approx. ৳${moneyEstimate()} today at ৳12.5/kWh`, "rgba(255,209,102,0.30)"),
+    statCard("Fans running", `${fansOn} / 6`, "60W each, animated when ON", "rgba(95,140,255,0.28)"),
+    statCard("Lights on", `${lightsOn} / 9`, `${loadPct}% of theoretical full load`, "rgba(57,229,140,0.28)")
+  ].join("");
+}
+
+function statCard(label, value, sub, accent) {
+  return `
+    <article class="stat-card" style="--accent:${accent}">
+      <div class="stat-label">${label}</div>
+      <div class="stat-value">${value}</div>
+      <div class="stat-sub">${sub}</div>
+    </article>
+  `;
+}
+
+function renderLayout() {
+  document.querySelectorAll(".room").forEach((roomEl) => {
+    const room = roomEl.dataset.room;
+    const watt = roomPower(room);
+    const heat = Math.min(0.42, 0.08 + watt / ROOM_MAX_WATT * 0.36).toFixed(2);
+    roomEl.classList.toggle("selected", room === state.selectedRoom);
+    roomEl.style.setProperty("--room-heat", heat);
+    roomEl.querySelector("[data-room-power]").textContent = `${watt} W`;
+  });
+
+  document.querySelectorAll(".device-node").forEach((node) => node.remove());
+  state.devices.forEach((device) => {
+    const roomEl = document.querySelector(`.room[data-room="${CSS.escape(device.room)}"]`);
+    if (!roomEl) return;
+    const pos = getDevicePosition(device);
+    const node = document.createElement("button");
+    node.type = "button";
+    node.className = `device-node ${device.type} ${device.on ? "on" : "off"} ${state.selectedDeviceId === device.id ? "selected" : ""}`;
+    node.style.setProperty("--x", pos.x);
+    node.style.setProperty("--y", pos.y);
+    node.dataset.deviceId = device.id;
+    node.setAttribute("aria-label", `${device.room} ${device.label} ${device.on ? "on" : "off"}`);
+    node.innerHTML = device.type === "fan"
+      ? `<span class="fan-spin"><span class="fan-blade"></span></span>${tooltip(device)}`
+      : `${tooltip(device)}`;
+    node.addEventListener("click", (event) => {
+      event.stopPropagation();
+      state.selectedRoom = device.room;
+      state.selectedDeviceId = device.id;
+      render();
+    });
+    roomEl.appendChild(node);
+  });
+}
+
+function tooltip(device) {
+  return `<span class="device-tooltip">${escapeHtml(device.label)}<br>${device.on ? "ON" : "OFF"} · ${device.on ? device.watt : 0}W<br>Changed ${relativeTime(device.lastChanged)}</span>`;
+}
+
+function getDevicePosition(device) {
+  const index = Number((device.label.match(/\d+/) || ["1"])[0]);
+  const positions = DEVICE_POSITIONS[device.room] || [];
+  return positions.find((pos) => pos.type === device.type && pos.idx === index) || { x: "50%", y: "50%" };
+}
+
+function renderRooms() {
+  els.roomList.innerHTML = ROOMS.map((room) => {
+    const devices = state.devices.filter((device) => device.room === room);
+    const onCount = devices.filter((device) => device.on).length;
+    const watt = roomPower(room);
+    const pct = Math.round((watt / ROOM_MAX_WATT) * 100);
+    return `
+      <article class="room-card ${room === state.selectedRoom ? "selected" : ""}" data-room-card="${escapeHtml(room)}">
+        <div class="room-card-head">
+          <div>
+            <div class="room-name">${room}</div>
+            <div class="room-summary">${onCount}/5 devices ON · ${pct}% room load</div>
+          </div>
+          <span class="state-chip">${watt}W</span>
+        </div>
+        <div class="mini-meter"><span style="--w:${pct}%"></span></div>
+      </article>
+    `;
+  }).join("");
+
+  document.querySelectorAll("[data-room-card]").forEach((card) => {
+    card.addEventListener("click", () => {
+      state.selectedRoom = card.dataset.roomCard;
+      state.selectedDeviceId = null;
+      render();
+    });
+  });
+}
+
+function renderDevices() {
+  const sorted = [...state.devices].sort((a, b) => ROOMS.indexOf(a.room) - ROOMS.indexOf(b.room) || a.type.localeCompare(b.type) || a.label.localeCompare(b.label));
+  els.deviceList.innerHTML = sorted.map(deviceRow).join("");
+  document.querySelectorAll("[data-device-row]").forEach((row) => {
+    row.addEventListener("click", () => {
+      const device = state.devices.find((d) => d.id === row.dataset.deviceRow);
+      if (!device) return;
+      state.selectedRoom = device.room;
+      state.selectedDeviceId = device.id;
+      render();
+    });
+  });
+}
+
+function deviceRow(device) {
+  return `
+    <article class="device-row ${device.on ? "on" : ""} ${state.selectedDeviceId === device.id ? "selected" : ""}" data-device-row="${escapeHtml(device.id)}">
+      <div class="row-icon">${device.type === "fan" ? "🌀" : "💡"}</div>
+      <div>
+        <div class="row-title">${device.room} · ${device.label}</div>
+        <div class="row-meta">${device.type.toUpperCase()} · ${device.watt}W rated · changed ${relativeTime(device.lastChanged)}</div>
+      </div>
+      <span class="state-chip">${device.on ? "ON" : "OFF"}</span>
+    </article>
+  `;
+}
+
+function renderDetails() {
+  const selected = state.devices.find((device) => device.id === state.selectedDeviceId)
+    || state.devices.find((device) => device.room === state.selectedRoom)
+    || state.devices[0];
+
+  if (!selected) {
+    els.detailGrid.innerHTML = `<div class="empty"><strong>⏳</strong>Waiting for device data</div>`;
+    return;
+  }
+
+  state.selectedDeviceId = selected.id;
+  els.selectedHint.textContent = `${selected.room} · ${selected.label}`;
+  els.detailGrid.innerHTML = `
+    <div class="detail-tile"><b>Status</b><span>${selected.on ? "ON" : "OFF"}</span></div>
+    <div class="detail-tile"><b>Current draw</b><span>${selected.on ? selected.watt : 0} W</span></div>
+    <div class="detail-tile"><b>Rated wattage</b><span>${selected.watt} W</span></div>
+    <div class="detail-tile"><b>Last changed</b><span>${relativeTime(selected.lastChanged)}</span></div>
+    <div class="detail-tile"><b>Room</b><span>${selected.room}</span></div>
+    <div class="detail-tile"><b>Device type</b><span>${selected.type}</span></div>
+  `;
+}
+
+function renderAlerts() {
+  const alerts = state.alerts.length ? state.alerts : buildAlerts(state.devices, state.officeHours);
+  if (!alerts.length) {
+    els.alerts.innerHTML = `<div class="empty"><strong>✅</strong>All clear right now</div>`;
+    return;
+  }
+  els.alerts.innerHTML = alerts.slice(0, 8).map((alert) => `
+    <article class="alert ${alert.level === "danger" ? "danger" : ""}">
+      <div>${alert.level === "danger" ? "🚨" : "⚠️"}</div>
+      <div>
+        <div class="alert-title">${escapeHtml(alert.message)}</div>
+        <div class="alert-time">Flagged ${relativeTime(alert.ts)}</div>
+      </div>
+    </article>
+  `).join("");
+}
+
+function bindStaticEvents() {
+  document.querySelectorAll(".room").forEach((roomEl) => {
+    roomEl.addEventListener("click", () => {
+      state.selectedRoom = roomEl.dataset.room;
+      state.selectedDeviceId = null;
+      render();
+    });
+  });
+
+  els.saveBackend.addEventListener("click", () => {
+    state.backendUrl = els.backendUrl.value.trim() || DEFAULT_BACKEND_URL;
+    localStorage.setItem("officequest.backendUrl", state.backendUrl);
+    state.connected = false;
+    els.connectionLabel.textContent = "Connecting";
+    sync();
+  });
+
+  els.backendUrl.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") els.saveBackend.click();
+  });
+}
+
+function render() {
+  ensureSelection();
+  renderClock();
+  renderConnection();
+  renderStats();
+  renderLayout();
+  renderRooms();
+  renderDetails();
+  renderAlerts();
+  renderDevices();
+}
+
+bindStaticEvents();
 render();
-fetchStatus();
-setInterval(fetchStatus, POLL_MS);
-// Keep the clock ticking smoothly between polls without hitting the network.
+sync();
+setInterval(sync, POLL_MS);
+setInterval(simulateTick, SIMULATION_MS);
 setInterval(render, 1000);
 </script>
-
 </body>
 </html>
