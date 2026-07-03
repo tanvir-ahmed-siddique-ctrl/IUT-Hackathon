@@ -82,7 +82,7 @@ function normalizeDevice(raw) {
     room: raw.room,
     type,
     label: raw.label || raw.name || `${type[0].toUpperCase()}${type.slice(1)}`,
-    watt: Number(raw.watt ?? raw.powerDraw ?? raw.power ?? raw.ratedWatt ?? fallbackWatt),
+    watt: Number(raw.watt ?? raw.wattage ?? raw.powerDraw ?? raw.power ?? raw.ratedWatt ?? fallbackWatt),
     on,
     lastChanged: Number(raw.lastChanged || Date.parse(raw.last_changed || raw.updatedAt || raw.updated_at) || Date.now()),
   };

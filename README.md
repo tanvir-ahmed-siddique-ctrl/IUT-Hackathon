@@ -2,10 +2,17 @@
 
 ## Setup
 1. npm install
-2. Copy _env.example to .env and fill in DISCORD_TOKEN
-3. npm run backend   (starts backend on localhost:4000)
-4. npm run bot       (optional, starts Discord bot)
-5. npm run dashboard (starts the Next.js web dashboard on localhost:3000)
+2. Copy `backend/.env.example` to `backend/.env` if you want to customize backend settings.
+3. Copy `bot/.env.example` to `bot/.env` and fill in `DISCORD_TOKEN` if you want to run the Discord bot.
+4. npm run backend   (starts backend on localhost:4000)
+5. npm run bot       (optional, starts Discord bot)
+6. npm run dashboard (starts the Next.js web dashboard on localhost:3000)
+
+## Backend and bot
+- `backend/` and `bot/` come from the `office_project` branch backend implementation.
+- The Vite dashboard from `office_project` is intentionally not included in the active app; this branch keeps the Next.js frontend in `app/`.
+- The imported backend owns the single source of truth in `backend/src/store.js`.
+- It exposes the original `office_project` endpoints (`/api/devices`, `/api/usage`, `/api/alerts`, Socket.IO), plus a compatibility `GET /api/status` endpoint for this Next.js dashboard.
 
 ## Frontend dashboard
 - The main dashboard is now a **Next.js + React JavaScript** app in `app/page.js`.
@@ -42,5 +49,5 @@ Expected `/api/status` shape:
 
 The adapter is intentionally flexible for the backend team:
 - device status can be `on: true` or `status: "on"`
-- power can be `watt`, `powerDraw`, `power`, or `ratedWatt`
+- power can be `watt`, `wattage`, `powerDraw`, `power`, or `ratedWatt`
 - timestamps can be `lastChanged`, `last_changed`, `updatedAt`, or `updated_at`
