@@ -196,11 +196,16 @@
     min-height: 690px;
     border-radius: 12px;
     overflow: hidden;
-    /* border: 1px solid var(--line-strong);
+    border: 1px solid var(--line-strong);
     background:
+      linear-gradient(135deg, rgba(255,255,255,0.78), rgba(255,255,255,0) 34%),
       radial-gradient(circle at 50% 120%, rgba(85, 133, 105, 0.16), transparent 36rem),
-      linear-gradient(180deg, #f9fbf6, #e7f3eb);
-    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.78), 0 22px 60px rgba(71, 103, 84, 0.13); */
+      linear-gradient(180deg, #fbfcf8, #e7f3eb);
+    box-shadow:
+      inset 0 0 0 1px rgba(255,255,255,0.78),
+      inset 0 -34px 70px rgba(92, 126, 105, 0.10),
+      0 22px 60px rgba(71, 103, 84, 0.13);
+    perspective: 1400px;
   }
 
   .plan-stage::after {
@@ -216,18 +221,26 @@
     position: absolute;
     inset: clamp(22px, 3.5vw, 46px);
     bottom: clamp(38px, 4vw, 54px);
+    transform: rotateX(2.1deg) rotateZ(-0.18deg);
+    transform-origin: 50% 56%;
+    filter: drop-shadow(0 30px 32px rgba(67, 88, 75, 0.18));
   }
 
   .room, .corridor {
     position: absolute;
-    border: 8px solid var(--wall);
+    border: 9px solid var(--wall);
     background-color: #f3eee3;
     box-shadow:
+      inset 10px 10px 0 rgba(255,255,255,0.38),
+      inset -9px -11px 0 rgba(74, 93, 82, 0.12),
       inset 0 0 0 1px rgba(255,255,255,0.75),
       inset 0 -58px 92px rgba(74, 93, 82, 0.07),
-      0 14px 28px rgba(74, 93, 82, 0.11);
-    overflow: hidden;
+      0 10px 0 #3f4d46,
+      0 26px 34px rgba(74, 93, 82, 0.16);
+    overflow: visible;
   }
+
+  .corridor { overflow: hidden; }
 
   .room {
     cursor: pointer;
@@ -236,13 +249,16 @@
 
   .room:hover,
   .room.selected {
-    border-color: #5b8572;
-    transform: translateY(-3px);
+    border-color: #6f967e;
+    transform: translateY(-2px);
     box-shadow:
+      inset 10px 10px 0 rgba(255,255,255,0.42),
+      inset -9px -11px 0 rgba(74, 93, 82, 0.10),
       inset 0 0 0 1px rgba(255,255,255,0.82),
       inset 0 -58px 92px rgba(74, 93, 82, 0.06),
-      0 22px 38px rgba(74, 93, 82, 0.18),
-      0 0 0 7px rgba(127, 197, 155, 0.16);
+      0 10px 0 #46584f,
+      0 22px 38px rgba(74, 93, 82, 0.19),
+      0 0 0 5px rgba(127, 197, 155, 0.13);
   }
 
   .room::before,
@@ -253,8 +269,8 @@
     background-image:
       linear-gradient(rgba(85, 102, 92, 0.10) 1px, transparent 1px),
       linear-gradient(90deg, rgba(85, 102, 92, 0.10) 1px, transparent 1px);
-    background-size: 44px 44px;
-    opacity: 0.72;
+    background-size: 38px 38px;
+    opacity: 0.54;
     pointer-events: none;
   }
 
@@ -264,7 +280,7 @@
     inset: 5%;
     border-radius: 50%;
     opacity: var(--heat, 0.08);
-    background: radial-gradient(circle, rgba(255, 207, 90, 0.88), transparent 58%);
+    background: radial-gradient(circle, rgba(255, 216, 116, 0.82), transparent 58%);
     pointer-events: none;
   }
 
@@ -306,26 +322,35 @@
 
   .room-label {
     position: absolute;
-    z-index: 12;
-    left: 18px;
-    top: 16px;
-    color: #28382f;
-    font-size: clamp(12px, 1.05vw, 16px);
+    z-index: 24;
+    left: 14px;
+    top: 13px;
+    max-width: 132px;
+    color: #263930;
+    font-size: clamp(10px, .86vw, 13px);
     font-weight: 950;
-    letter-spacing: -0.02em;
+    letter-spacing: 0.03em;
     text-transform: uppercase;
+    line-height: 1.15;
+    padding: 8px 9px;
+    border-radius: 13px;
+    background: rgba(255, 255, 255, 0.56);
+    border: 1px solid rgba(52, 75, 63, 0.12);
+    box-shadow: 0 7px 16px rgba(72, 92, 80, 0.10);
+    backdrop-filter: blur(6px);
   }
 
   .room-label span {
     display: inline-flex;
-    margin-top: 7px;
+    margin-top: 5px;
     border-radius: 999px;
-    padding: 5px 9px;
-    color: #fff;
-    background: rgba(38, 58, 47, 0.82);
-    font-size: 11px;
+    padding: 3px 7px;
+    color: #244237;
+    background: rgba(199, 234, 214, 0.78);
+    font-size: 10px;
     letter-spacing: 0;
     text-transform: none;
+    white-space: nowrap;
   }
 
   .entry {
@@ -351,14 +376,39 @@
 
   .door {
     position: absolute;
-    z-index: 14;
-    width: 56px;
-    height: 56px;
-    border: 3px solid rgba(255,255,255,0.88);
+    z-index: 30;
+    width: 46px;
+    height: 46px;
+    border: 2px solid rgba(71, 87, 78, 0.46);
     border-left: 0;
     border-bottom: 0;
-    border-radius: 0 56px 0 0;
+    border-radius: 0 46px 0 0;
     pointer-events: none;
+    background: radial-gradient(circle at 100% 0, rgba(255,255,255,0.42), transparent 64%);
+  }
+
+  .door::before {
+    content: "";
+    position: absolute;
+    right: -2px;
+    top: -3px;
+    width: 4px;
+    height: 50px;
+    border-radius: 999px;
+    background: #f7f3e8;
+    box-shadow: 0 2px 6px rgba(60, 78, 68, 0.18);
+  }
+
+  .door::after {
+    content: "";
+    position: absolute;
+    right: 5px;
+    top: 4px;
+    width: 34px;
+    height: 4px;
+    border-radius: 999px;
+    background: rgba(117, 94, 63, 0.50);
+    box-shadow: 0 1px 0 rgba(255,255,255,0.42);
   }
 
   .door.d1 { left: 20%; top: 64%; transform: rotate(180deg); }
@@ -368,29 +418,38 @@
 
   .window {
     position: absolute;
-    z-index: 12;
+    z-index: 32;
     border-radius: 999px;
-    background: linear-gradient(90deg, #a8e4ee, #ffffff, #a8e4ee);
-    border: 1px solid rgba(54, 91, 76, 0.20);
-    box-shadow: 0 0 18px rgba(115, 181, 172, 0.28);
+    background:
+      linear-gradient(90deg, transparent 0 22%, rgba(69, 127, 136, 0.32) 22% 25%, transparent 25% 48%, rgba(69, 127, 136, 0.32) 48% 52%, transparent 52% 75%, rgba(69, 127, 136, 0.32) 75% 78%, transparent 78%),
+      linear-gradient(90deg, #9fdae2, #ffffff 48%, #a6dfe6);
+    border: 1px solid rgba(54, 91, 76, 0.24);
+    box-shadow:
+      0 0 16px rgba(115, 181, 172, 0.24),
+      inset 0 -2px 0 rgba(60, 105, 98, 0.18);
   }
 
-  .w-top { top: -3px; height: 7px; width: 13%; }
-  .w-left { left: -3px; top: 18%; width: 7px; height: 20%; }
-  .w-right { right: -3px; top: 34%; width: 7px; height: 21%; }
+  .w-top { top: -5px; height: 10px; width: 13%; }
+  .w-left { left: -5px; top: 18%; width: 10px; height: 20%; background: linear-gradient(180deg, #9fdae2, #fff, #a6dfe6); }
+  .w-right { right: -5px; top: 34%; width: 10px; height: 21%; background: linear-gradient(180deg, #9fdae2, #fff, #a6dfe6); }
 
   .fixture {
     position: absolute;
     z-index: 6;
     transform: translate(-50%, -50%);
+    filter: drop-shadow(0 7px 7px rgba(67, 88, 75, 0.13));
   }
 
   .sofa {
-    width: 58px;
+    width: 62px;
     height: 168px;
-    border-radius: 18px;
-    background: linear-gradient(90deg, #b99f7a, #e1c9a5 52%, #aa8d67);
-    box-shadow: inset 0 0 0 4px rgba(99, 70, 43, 0.12), 0 8px 16px rgba(80, 58, 38, 0.13);
+    border-radius: 19px;
+    background: linear-gradient(90deg, #aa8a61, #e4c99d 47%, #b28f65);
+    box-shadow:
+      inset 7px 0 0 rgba(255,255,255,0.18),
+      inset -7px 0 0 rgba(92, 64, 39, 0.12),
+      0 9px 0 rgba(107, 76, 50, 0.16),
+      0 13px 18px rgba(80, 58, 38, 0.13);
   }
 
   .sofa::before {
@@ -404,9 +463,12 @@
   .table {
     width: 62px;
     height: 98px;
-    border-radius: 10px;
-    background: linear-gradient(135deg, #765336, #b48554);
-    border: 4px solid rgba(87, 55, 32, 0.28);
+    border-radius: 12px;
+    background:
+      linear-gradient(135deg, rgba(255,255,255,0.18), transparent 42%),
+      linear-gradient(135deg, #765336, #b48554);
+    border: 3px solid rgba(87, 55, 32, 0.24);
+    box-shadow: inset 0 -8px 0 rgba(74, 47, 29, 0.12), 0 8px 0 rgba(91, 58, 37, 0.14);
   }
 
   .armchair {
@@ -421,10 +483,12 @@
   .desk {
     width: 82px;
     height: 52px;
-    border-radius: 7px;
-    background: linear-gradient(135deg, #bb8750, #e1ad6e);
+    border-radius: 8px;
+    background:
+      linear-gradient(135deg, rgba(255,255,255,0.24), transparent 45%),
+      linear-gradient(135deg, #b47b45, #e0ab68);
     border: 2px solid rgba(83, 50, 20, 0.22);
-    box-shadow: 0 8px 14px rgba(83, 50, 20, 0.13);
+    box-shadow: inset 0 -7px 0 rgba(94, 56, 28, 0.12), 0 8px 0 rgba(94, 56, 28, 0.12), 0 12px 14px rgba(83, 50, 20, 0.10);
   }
 
   .desk::before {
@@ -444,7 +508,7 @@
     height: 34px;
     border-radius: 11px 11px 15px 15px;
     background: linear-gradient(#405460, #23333d);
-    box-shadow: inset 0 -8px 0 rgba(0,0,0,0.15), 0 5px 10px rgba(50, 66, 59, 0.12);
+    box-shadow: inset 0 -8px 0 rgba(0,0,0,0.15), 0 5px 0 rgba(28, 43, 50, 0.13), 0 9px 10px rgba(50, 66, 59, 0.10);
   }
 
   .plant {
@@ -466,7 +530,7 @@
   }
 
   .device {
-    --size: 45px;
+    --size: 39px;
     position: absolute;
     z-index: 20;
     left: var(--x);
@@ -475,55 +539,100 @@
     height: var(--size);
     border: 0;
     border-radius: 50%;
-    transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%) translateZ(0);
     display: grid;
     place-items: center;
     cursor: pointer;
     background: #edf1ec;
-    box-shadow: inset 0 0 0 1px rgba(53, 74, 61, 0.15), 0 8px 18px rgba(50, 70, 58, 0.13);
+    box-shadow:
+      inset 0 2px 0 rgba(255,255,255,0.82),
+      inset 0 -5px 0 rgba(64, 82, 72, 0.08),
+      0 7px 0 rgba(67, 88, 75, 0.10),
+      0 10px 16px rgba(50, 70, 58, 0.12);
     color: #7a8780;
     transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+    isolation: isolate;
   }
 
   .device:hover,
   .device.selected {
-    transform: translate(-50%, -50%) scale(1.12);
-    box-shadow: inset 0 0 0 1px rgba(53, 74, 61, 0.16), 0 14px 28px rgba(50, 70, 58, 0.18), 0 0 0 7px rgba(127,197,155,0.22);
+    transform: translate(-50%, -50%) scale(1.05);
+    z-index: 42;
+    box-shadow:
+      inset 0 2px 0 rgba(255,255,255,0.84),
+      inset 0 -5px 0 rgba(64, 82, 72, 0.08),
+      0 8px 0 rgba(67, 88, 75, 0.10),
+      0 13px 20px rgba(50, 70, 58, 0.16),
+      0 0 0 4px rgba(127,197,155,0.16);
   }
 
   .device.light::before {
     content: "";
-    width: 18px;
-    height: 18px;
+    width: 19px;
+    height: 19px;
     border-radius: 50%;
-    border: 3px solid currentColor;
-    background: rgba(255,255,255,0.38);
+    border: 2px solid currentColor;
+    background:
+      radial-gradient(circle at 35% 30%, rgba(255,255,255,0.96), rgba(255,255,255,0.30) 35%, transparent 36%),
+      rgba(255,255,255,0.38);
+    box-shadow: inset 0 -2px 0 rgba(71, 78, 68, 0.10);
   }
 
   .device.light.on {
     color: #fff7c8;
-    background: radial-gradient(circle, #fff8bc 0 26%, #ffcf5a 27% 54%, #9d7332 55%);
-    box-shadow: 0 0 34px rgba(255, 207, 90, 0.92), 0 0 92px rgba(255, 207, 90, 0.40);
+    background:
+      radial-gradient(circle, rgba(255,255,255,0.96) 0 16%, #fff4a7 17% 38%, #efbd4a 39% 61%, #9d7332 62%);
+    box-shadow:
+      0 7px 0 rgba(135, 96, 38, 0.13),
+      0 0 24px rgba(255, 207, 90, 0.82),
+      0 0 58px rgba(255, 207, 90, 0.28);
+  }
+
+  .device.light.on::after {
+    content: "";
+    position: absolute;
+    inset: -12px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 218, 100, 0.30), transparent 68%);
+    z-index: -1;
+    pointer-events: none;
   }
 
   .device.fan {
-    background: #eaf0ed;
+    background:
+      radial-gradient(circle, #f7fbf8 0 18%, #dce7e0 19% 48%, #b8c9bf 49% 51%, #eaf0ed 52%);
   }
 
   .fan-core {
     position: absolute;
-    inset: 8px;
+    inset: 7px;
+    transform-origin: 50% 50%;
+    will-change: transform;
+  }
+
+  .fan-core::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 8px;
+    height: 8px;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background: currentColor;
+    box-shadow: 0 0 0 3px rgba(255,255,255,0.35);
   }
 
   .blade {
     position: absolute;
     left: 50%;
-    top: 2px;
-    width: 7px;
-    height: 25px;
-    border-radius: 999px;
-    background: currentColor;
-    transform-origin: 50% 20px;
+    top: 1px;
+    width: 8px;
+    height: 23px;
+    border-radius: 999px 999px 65% 65%;
+    background: linear-gradient(currentColor, color-mix(in srgb, currentColor 68%, transparent));
+    transform-origin: 50% 18px;
+    opacity: .92;
   }
 
   .blade:nth-child(1) { transform: translateX(-50%) rotate(0deg); }
@@ -532,12 +641,21 @@
 
   .device.fan.on {
     color: #f9fffb;
-    background: radial-gradient(circle, #f9fffb 0 13%, #8edcaf 14% 44%, #377958 45%);
-    box-shadow: 0 0 32px rgba(55, 151, 96, 0.52), 0 0 76px rgba(55, 151, 96, 0.18);
+    background:
+      radial-gradient(circle, #f9fffb 0 12%, #b9efca 13% 37%, #5bae7b 38% 59%, #377958 60%);
+    box-shadow:
+      0 7px 0 rgba(35, 99, 61, 0.12),
+      0 0 22px rgba(55, 151, 96, 0.46),
+      0 0 54px rgba(55, 151, 96, 0.16);
   }
 
   .device.fan.on .fan-core {
-    animation: spin .72s linear infinite;
+    animation: spin .58s linear infinite;
+  }
+
+  .device.fan.on .blade {
+    opacity: .76;
+    filter: blur(.2px);
   }
 
   @keyframes spin { to { transform: rotate(360deg); } }
@@ -545,24 +663,28 @@
   .tip {
     position: absolute;
     left: 50%;
-    bottom: calc(100% + 8px);
-    transform: translateX(-50%) translateY(4px);
-    min-width: 150px;
-    border-radius: 14px;
-    padding: 9px 10px;
+    top: calc(100% + 8px);
+    transform: translateX(-50%) translateY(-2px);
+    width: max-content;
+    max-width: 116px;
+    border-radius: 11px;
+    padding: 6px 8px;
     color: #fff;
     background: rgba(31, 48, 39, 0.92);
     opacity: 0;
     pointer-events: none;
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 820;
-    line-height: 1.45;
+    line-height: 1.35;
+    white-space: normal;
+    z-index: 90;
+    box-shadow: 0 9px 20px rgba(47, 68, 55, 0.20);
     transition: opacity .16s ease, transform .16s ease;
   }
 
   .device:hover .tip {
     opacity: 1;
-    transform: translateX(-50%);
+    transform: translateX(-50%) translateY(0);
   }
 
   .floor-footer {
@@ -1151,7 +1273,7 @@
         </div>
 
         <div class="room drawing" data-room="Drawing Room">
-          <div class="room-label">Drawing Room <span data-room-power="Drawing Room">0 W</span></div>
+          <div class="room-label">Drawing Room <span data-room-power="Drawing Room">0W</span></div>
           <div class="fixture sofa" style="left: 15%; top: 48%;"></div>
           <div class="fixture table" style="left: 43%; top: 53%;"></div>
           <div class="fixture armchair" style="left: 18%; top: 80%;"></div>
@@ -1160,7 +1282,7 @@
         </div>
 
         <div class="room work1" data-room="Work Room 1">
-          <div class="room-label">Work Room 1 <span data-room-power="Work Room 1">0 W</span></div>
+          <div class="room-label">Work Room 1 <span data-room-power="Work Room 1">0W</span></div>
           <div class="fixture desk" style="left: 24%; top: 34%;"></div>
           <div class="fixture chair" style="left: 24%; top: 49%;"></div>
           <div class="fixture desk" style="left: 76%; top: 34%;"></div>
@@ -1172,7 +1294,7 @@
         </div>
 
         <div class="room work2" data-room="Work Room 2">
-          <div class="room-label">Work Room 2 <span data-room-power="Work Room 2">0 W</span></div>
+          <div class="room-label">Work Room 2 <span data-room-power="Work Room 2">0W</span></div>
           <div class="fixture desk" style="left: 24%; top: 34%;"></div>
           <div class="fixture chair" style="left: 24%; top: 49%;"></div>
           <div class="fixture desk" style="left: 76%; top: 34%;"></div>
@@ -1353,24 +1475,24 @@ const POLL_MS = 3000;
 const SIM_MS = 3200;
 const DEVICE_POSITIONS = {
   "Drawing Room": [
-    { type: "fan", idx: 1, x: "55%", y: "22%" },
-    { type: "fan", idx: 2, x: "56%", y: "70%" },
-    { type: "light", idx: 1, x: "31%", y: "20%" },
-    { type: "light", idx: 2, x: "83%", y: "20%" },
-    { type: "light", idx: 3, x: "55%", y: "84%" }
+    { type: "fan", idx: 1, x: "57%", y: "24%" },
+    { type: "fan", idx: 2, x: "58%", y: "69%" },
+    { type: "light", idx: 1, x: "31%", y: "27%" },
+    { type: "light", idx: 2, x: "83%", y: "26%" },
+    { type: "light", idx: 3, x: "58%", y: "84%" }
   ],
   "Work Room 1": [
-    { type: "fan", idx: 1, x: "51%", y: "22%" },
+    { type: "fan", idx: 1, x: "52%", y: "26%" },
     { type: "fan", idx: 2, x: "51%", y: "66%" },
-    { type: "light", idx: 1, x: "23%", y: "20%" },
-    { type: "light", idx: 2, x: "81%", y: "20%" },
+    { type: "light", idx: 1, x: "28%", y: "27%" },
+    { type: "light", idx: 2, x: "82%", y: "27%" },
     { type: "light", idx: 3, x: "51%", y: "84%" }
   ],
   "Work Room 2": [
-    { type: "fan", idx: 1, x: "50%", y: "22%" },
+    { type: "fan", idx: 1, x: "51%", y: "26%" },
     { type: "fan", idx: 2, x: "50%", y: "66%" },
-    { type: "light", idx: 1, x: "22%", y: "20%" },
-    { type: "light", idx: 2, x: "82%", y: "20%" },
+    { type: "light", idx: 1, x: "29%", y: "27%" },
+    { type: "light", idx: 2, x: "83%", y: "27%" },
     { type: "light", idx: 3, x: "50%", y: "84%" }
   ]
 };
@@ -1654,7 +1776,7 @@ function renderPlan() {
     const heat = Math.min(0.38, 0.06 + watt / ROOM_MAX_WATT * 0.32).toFixed(2);
     roomEl.classList.toggle("selected", room === state.selectedRoom);
     roomEl.style.setProperty("--heat", heat);
-    roomEl.querySelector("[data-room-power]").textContent = `${watt} W`;
+    roomEl.querySelector("[data-room-power]").textContent = `${watt}W`;
   });
 
   document.querySelectorAll(".device").forEach((node) => node.remove());
@@ -1683,7 +1805,7 @@ function renderPlan() {
 }
 
 function tooltip(device) {
-  return `<span class="tip">${escapeHtml(device.label)}<br>${device.on ? "ON" : "OFF"} · ${device.on ? device.watt : 0}W<br>Changed ${relativeTime(device.lastChanged)}</span>`;
+  return `<span class="tip">${escapeHtml(device.label)} · ${device.on ? "ON" : "OFF"}<br>${device.on ? device.watt : 0}W · ${relativeTime(device.lastChanged)}</span>`;
 }
 
 function getDevicePosition(device) {
