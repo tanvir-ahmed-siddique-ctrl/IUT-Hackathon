@@ -1,24 +1,6 @@
-/**
- * llm.js
- * ---------------------------------------------------------------------------
- * Turns raw JSON facts (never hardcoded/random text) into a friendly reply.
- * If ANTHROPIC_API_KEY is set, we ask Claude to phrase the given facts
- * conversationally. If it's not set (or the call fails), we fall back to a
- * simple, still-dynamic template so the bot works out of the box.
- *
- * IMPORTANT: the LLM is only ever given facts we already computed from the
- * live store (via the backend API) - it is not allowed to invent numbers.
- * ---------------------------------------------------------------------------
- */
-
-const hasKey = !!process.env.ANTHROPIC_API_KEY;
-let Anthropic = null;
-let client = null;
-
-if (hasKey) {
-  Anthropic = require("@anthropic-ai/sdk");
-  client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-}
+const hasKey = !!process.env.GROQ_API_KEY;
+const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
+const GROQ_MODEL = process.env.GROQ_MODEL || "llama-3.1-8b-instant";
 
 const SYSTEM_PROMPT = `You are the office's friendly building-management assistant, speaking inside Discord.
 You will be given ONLY factual JSON about the current state of office devices/power.
@@ -31,25 +13,35 @@ async function humanize(kind, facts) {
     return templateFallback(kind, facts);
   }
   try {
-    const response = await client.messages.create({
-      model: "claude-sonnet-4-6",
-      max_tokens: 300,
-      system: SYSTEM_PROMPT,
-      messages: [
-        {
-          role: "user",
-          content: `Message type: ${kind}\nFacts (JSON):\n${JSON.stringify(facts, null, 2)}\n\nWrite the Discord reply now.`,
-        },
-      ],
+    const res = await fetch(GROQ_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: GROQ_MODEL,
+        max_tokens: 300,
+        temperature: 0.6,
+        messages: [
+          { role: "system", content: SYSTEM_PROMPT },
+          {
+            role: "user",
+            content: `Message type: ${kind}\nFacts (JSON):\n${JSON.stringify(facts, null, 2)}\n\nWrite the Discord reply now.`,
+          },
+        ],
+      }),
     });
-    const text = response.content
-      .filter((block) => block.type === "text")
-      .map((block) => block.text)
-      .join("\n")
-      .trim();
+
+    if (!res.ok) {
+      throw new Error(`Groq API responded ${res.status}: ${await res.text()}`);
+    }
+
+    const data = await res.json();
+    const text = data.choices?.[0]?.message?.content?.trim();
     return text || templateFallback(kind, facts);
   } catch (err) {
-    console.error("[llm] Anthropic call failed, falling back to template:", err.message);
+    console.error("[llm] Groq call failed, falling back to template:", err.message);
     return templateFallback(kind, facts);
   }
 }
