@@ -605,39 +605,34 @@
 
   .fan-core {
     position: absolute;
-    inset: 7px;
+    inset: 6px;
+    display: grid;
+    place-items: center;
+    contain: layout paint;
+    backface-visibility: hidden;
+    transform: translate3d(0,0,0);
+  }
+
+  .fan-svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    overflow: visible;
     transform-origin: 50% 50%;
     will-change: transform;
+    backface-visibility: hidden;
   }
 
-  .fan-core::after {
-    content: "";
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    width: 8px;
-    height: 8px;
-    transform: translate(-50%, -50%);
-    border-radius: 50%;
-    background: currentColor;
-    box-shadow: 0 0 0 3px rgba(255,255,255,0.35);
+  .fan-svg .blade-shape {
+    fill: currentColor;
+    opacity: .88;
   }
 
-  .blade {
-    position: absolute;
-    left: 50%;
-    top: 1px;
-    width: 8px;
-    height: 23px;
-    border-radius: 999px 999px 65% 65%;
-    background: linear-gradient(currentColor, color-mix(in srgb, currentColor 68%, transparent));
-    transform-origin: 50% 18px;
-    opacity: .92;
+  .fan-svg .hub {
+    fill: currentColor;
+    stroke: rgba(255,255,255,0.42);
+    stroke-width: 3;
   }
-
-  .blade:nth-child(1) { transform: translateX(-50%) rotate(0deg); }
-  .blade:nth-child(2) { transform: translateX(-50%) rotate(120deg); }
-  .blade:nth-child(3) { transform: translateX(-50%) rotate(240deg); }
 
   .device.fan.on {
     color: #f9fffb;
@@ -650,15 +645,17 @@
   }
 
   .device.fan.on .fan-core {
-    animation: spin .58s linear infinite;
+    color: #f9fffb;
   }
 
-  .device.fan.on .blade {
-    opacity: .76;
-    filter: blur(.2px);
+  .device.fan.on .fan-svg {
+    animation: fanSpin .82s linear infinite;
   }
 
-  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes fanSpin {
+    from { transform: rotate(0turn) translateZ(0); }
+    to { transform: rotate(1turn) translateZ(0); }
+  }
 
   .tip {
     position: absolute;
@@ -1779,33 +1776,61 @@ function renderPlan() {
     roomEl.querySelector("[data-room-power]").textContent = `${watt}W`;
   });
 
-  document.querySelectorAll(".device").forEach((node) => node.remove());
+  const seenDeviceIds = new Set();
   state.devices.forEach((device) => {
     const roomEl = document.querySelector(`.room[data-room="${CSS.escape(device.room)}"]`);
     if (!roomEl) return;
     const pos = getDevicePosition(device);
-    const node = document.createElement("button");
-    node.type = "button";
+    seenDeviceIds.add(device.id);
+    let node = document.querySelector(`.device[data-device-id="${CSS.escape(device.id)}"]`);
+    const isNewNode = !node;
+    if (isNewNode) {
+      node = document.createElement("button");
+      node.type = "button";
+      node.dataset.deviceId = device.id;
+      node.innerHTML = device.type === "fan"
+        ? `${fanIcon()}${tooltip(device)}`
+        : tooltip(device);
+      node.addEventListener("click", (event) => {
+        event.stopPropagation();
+        const clickedDevice = state.devices.find((item) => item.id === node.dataset.deviceId);
+        if (!clickedDevice) return;
+        state.selectedRoom = clickedDevice.room;
+        state.selectedDeviceId = clickedDevice.id;
+        render();
+      });
+    }
     node.className = `device ${device.type} ${device.on ? "on" : "off"} ${state.selectedDeviceId === device.id ? "selected" : ""}`;
     node.style.setProperty("--x", pos.x);
     node.style.setProperty("--y", pos.y);
-    node.dataset.deviceId = device.id;
     node.setAttribute("aria-label", `${device.room} ${device.label} ${device.on ? "on" : "off"}`);
-    node.innerHTML = device.type === "fan"
-      ? `<span class="fan-core"><span class="blade"></span><span class="blade"></span><span class="blade"></span></span>${tooltip(device)}`
-      : tooltip(device);
-    node.addEventListener("click", (event) => {
-      event.stopPropagation();
-      state.selectedRoom = device.room;
-      state.selectedDeviceId = device.id;
-      render();
-    });
-    roomEl.appendChild(node);
+    const tip = node.querySelector(".tip");
+    if (tip) tip.innerHTML = tooltipContent(device);
+    if (node.parentElement !== roomEl) roomEl.appendChild(node);
+  });
+  document.querySelectorAll(".device").forEach((node) => {
+    if (!seenDeviceIds.has(node.dataset.deviceId)) node.remove();
   });
 }
 
 function tooltip(device) {
-  return `<span class="tip">${escapeHtml(device.label)} · ${device.on ? "ON" : "OFF"}<br>${device.on ? device.watt : 0}W · ${relativeTime(device.lastChanged)}</span>`;
+  return `<span class="tip">${tooltipContent(device)}</span>`;
+}
+
+function tooltipContent(device) {
+  return `${escapeHtml(device.label)} · ${device.on ? "ON" : "OFF"}<br>${device.on ? device.watt : 0}W · ${relativeTime(device.lastChanged)}`;
+}
+
+function fanIcon() {
+  return `
+    <span class="fan-core" aria-hidden="true">
+      <svg class="fan-svg" viewBox="0 0 36 36" focusable="false">
+        <path class="blade-shape" d="M18 3.5c4.2 0 7.1 3.3 5.8 7.3-.8 2.5-3 4.1-5.8 5.5-2.8-1.4-5-3-5.8-5.5C10.9 6.8 13.8 3.5 18 3.5Z"/>
+        <path class="blade-shape" transform="rotate(120 18 18)" d="M18 3.5c4.2 0 7.1 3.3 5.8 7.3-.8 2.5-3 4.1-5.8 5.5-2.8-1.4-5-3-5.8-5.5C10.9 6.8 13.8 3.5 18 3.5Z"/>
+        <path class="blade-shape" transform="rotate(240 18 18)" d="M18 3.5c4.2 0 7.1 3.3 5.8 7.3-.8 2.5-3 4.1-5.8 5.5-2.8-1.4-5-3-5.8-5.5C10.9 6.8 13.8 3.5 18 3.5Z"/>
+        <circle class="hub" cx="18" cy="18" r="4.2"/>
+      </svg>
+    </span>`;
 }
 
 function getDevicePosition(device) {
@@ -1937,7 +1962,7 @@ render();
 sync();
 setInterval(sync, POLL_MS);
 setInterval(simulateTick, SIM_MS);
-setInterval(render, 1000);
+setInterval(renderChrome, 1000);
 </script>
 </body>
 </html>
