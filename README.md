@@ -130,10 +130,5 @@ for 2+ hours) to that channel.
 
 ## Video demo
 
-Record a ≤3 minute walkthrough: show the dashboard live-updating, run
-`!status` / `!room work1` / `!usage` in Discord, trigger/point out an alert,
-and briefly narrate the data flow diagram above. Add the video link here
-once recorded:
-
 > Demo video: _add link_
 "# Office-monitor" 
