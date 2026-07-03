@@ -180,6 +180,12 @@ function getDevicePosition(device) {
   return (DEVICE_POSITIONS[device.room] || []).find((pos) => pos.type === device.type && pos.idx === index) || { x: "50%", y: "50%" };
 }
 
+function isRiskRoom(room, devices, power, officeHours) {
+  const roomDevices = devices.filter((device) => device.room === room);
+  const watt = roomPowerFrom(devices, power, room);
+  return watt >= ROOM_MAX_WATT * 0.75 || (!officeHours && roomDevices.some((device) => device.on));
+}
+
 function FanIcon({ id }) {
   const gradientId = `fanBlade-${id}`;
   return (
@@ -214,13 +220,13 @@ function LightIcon() {
   );
 }
 
-function DeviceNode({ device, selected, now, onSelect }) {
+function DeviceNode({ device, selected, now, onSelect, focusMode }) {
   const pos = getDevicePosition(device);
   const changedText = displayRelativeTime(device.lastChanged, now);
   return (
     <button
       type="button"
-      className={`device ${device.type} ${device.on ? "on" : "off"} ${selected ? "selected" : ""}`}
+      className={`device ${device.type} ${device.on ? "on" : "off"} ${selected ? "selected" : ""} ${focusMode === "running" && !device.on ? "dimmed" : ""}`}
       style={{ "--x": pos.x, "--y": pos.y }}
       aria-label={`${device.room} ${device.label} ${device.on ? "on" : "off"}`}
       onClick={(event) => {
@@ -242,9 +248,9 @@ function Fixture({ className, left, top }) {
   return <div className={`fixture ${className}`} style={{ left, top }} />;
 }
 
-function Room({ className, room, watt, selected, heat, children, onSelect }) {
+function Room({ className, room, watt, selected, risk, heat, children, onSelect }) {
   return (
-    <div className={`room ${className} ${selected ? "selected" : ""}`} data-room={room} style={{ "--heat": heat }} onClick={() => onSelect(room)}>
+    <div className={`room ${className} ${selected ? "selected" : ""} ${risk ? "risk" : ""}`} data-room={room} style={{ "--heat": heat }} onClick={() => onSelect(room)}>
       <div className="room-label">
         {room} <span>{watt}W</span>
       </div>
@@ -267,6 +273,7 @@ export default function DashboardPage() {
   const [infoOpen, setInfoOpen] = useState(false);
   const [now, setNow] = useState(null);
   const [alertHistory, setAlertHistory] = useState([]);
+  const [focusMode, setFocusMode] = useState("all");
   const connectedRef = useRef(false);
 
   useEffect(() => {
@@ -412,7 +419,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="plan-stage">
+          <div className={`plan-stage lens-${focusMode}`}>
             <div className="office-plan">
               <div className="corridor">
                 <Fixture className="plant" left="5%" top="34%" />
@@ -420,7 +427,7 @@ export default function DashboardPage() {
                 <Fixture className="water" left="96%" top="64%" />
               </div>
 
-              <Room className="drawing" room="Drawing Room" watt={roomPowerFrom(devices, power, "Drawing Room")} heat={Math.min(0.38, 0.06 + roomPowerFrom(devices, power, "Drawing Room") / ROOM_MAX_WATT * 0.32).toFixed(2)} selected={selectedRoom === "Drawing Room"} onSelect={selectRoom}>
+              <Room className="drawing" room="Drawing Room" watt={roomPowerFrom(devices, power, "Drawing Room")} heat={Math.min(0.38, 0.06 + roomPowerFrom(devices, power, "Drawing Room") / ROOM_MAX_WATT * 0.32).toFixed(2)} selected={selectedRoom === "Drawing Room"} risk={isRiskRoom("Drawing Room", devices, power, officeHours)} onSelect={selectRoom}>
                 <Fixture className="rug" left="48%" top="61%" />
                 <Fixture className="sofa" left="15%" top="48%" />
                 <Fixture className="table" left="43%" top="53%" />
@@ -428,24 +435,24 @@ export default function DashboardPage() {
                 <Fixture className="plant" left="10%" top="14%" />
                 <Fixture className="plant" left="84%" top="82%" />
                 {devices.filter((device) => device.room === "Drawing Room").map((device) => (
-                  <DeviceNode key={device.id} device={device} selected={selectedDeviceId === device.id} now={now} onSelect={selectDevice} />
+                  <DeviceNode key={device.id} device={device} selected={selectedDeviceId === device.id} now={now} onSelect={selectDevice} focusMode={focusMode} />
                 ))}
               </Room>
 
-              <Room className="work1" room="Work Room 1" watt={roomPowerFrom(devices, power, "Work Room 1")} heat={Math.min(0.38, 0.06 + roomPowerFrom(devices, power, "Work Room 1") / ROOM_MAX_WATT * 0.32).toFixed(2)} selected={selectedRoom === "Work Room 1"} onSelect={selectRoom}>
+              <Room className="work1" room="Work Room 1" watt={roomPowerFrom(devices, power, "Work Room 1")} heat={Math.min(0.38, 0.06 + roomPowerFrom(devices, power, "Work Room 1") / ROOM_MAX_WATT * 0.32).toFixed(2)} selected={selectedRoom === "Work Room 1"} risk={isRiskRoom("Work Room 1", devices, power, officeHours)} onSelect={selectRoom}>
                 {["24", "76"].map((left) => [34, 72].map((top) => <Fixture key={`${left}-${top}-desk`} className="desk" left={`${left}%`} top={`${top}%`} />))}
                 {["24", "76"].map((left) => [49, 87].map((top) => <Fixture key={`${left}-${top}-chair`} className="chair" left={`${left}%`} top={`${top}%`} />))}
                 {devices.filter((device) => device.room === "Work Room 1").map((device) => (
-                  <DeviceNode key={device.id} device={device} selected={selectedDeviceId === device.id} now={now} onSelect={selectDevice} />
+                  <DeviceNode key={device.id} device={device} selected={selectedDeviceId === device.id} now={now} onSelect={selectDevice} focusMode={focusMode} />
                 ))}
               </Room>
 
-              <Room className="work2" room="Work Room 2" watt={roomPowerFrom(devices, power, "Work Room 2")} heat={Math.min(0.38, 0.06 + roomPowerFrom(devices, power, "Work Room 2") / ROOM_MAX_WATT * 0.32).toFixed(2)} selected={selectedRoom === "Work Room 2"} onSelect={selectRoom}>
+              <Room className="work2" room="Work Room 2" watt={roomPowerFrom(devices, power, "Work Room 2")} heat={Math.min(0.38, 0.06 + roomPowerFrom(devices, power, "Work Room 2") / ROOM_MAX_WATT * 0.32).toFixed(2)} selected={selectedRoom === "Work Room 2"} risk={isRiskRoom("Work Room 2", devices, power, officeHours)} onSelect={selectRoom}>
                 {["24", "76"].map((left) => [34, 72].map((top) => <Fixture key={`${left}-${top}-desk`} className="desk" left={`${left}%`} top={`${top}%`} />))}
                 {["24", "76"].map((left) => [49, 87].map((top) => <Fixture key={`${left}-${top}-chair`} className="chair" left={`${left}%`} top={`${top}%`} />))}
                 <Fixture className="plant" left="88%" top="39%" />
                 {devices.filter((device) => device.room === "Work Room 2").map((device) => (
-                  <DeviceNode key={device.id} device={device} selected={selectedDeviceId === device.id} now={now} onSelect={selectDevice} />
+                  <DeviceNode key={device.id} device={device} selected={selectedDeviceId === device.id} now={now} onSelect={selectDevice} focusMode={focusMode} />
                 ))}
               </Room>
 
@@ -469,6 +476,13 @@ export default function DashboardPage() {
               <span>🌀 fan</span>
               <span>yellow glow = on</span>
               <span>green glow = active fan</span>
+            </div>
+            <div className="demo-lens" aria-label="Demo lens controls">
+              {["all", "running", "risk"].map((mode) => (
+                <button key={mode} type="button" className={focusMode === mode ? "active" : ""} onClick={() => setFocusMode(mode)}>
+                  {mode === "all" ? "All" : mode === "running" ? "Running" : "Risk"}
+                </button>
+              ))}
             </div>
             <div>{syncText}</div>
           </div>

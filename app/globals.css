@@ -402,43 +402,61 @@ button {
 .door {
   position: absolute;
   z-index: 30;
-  width: 46px;
-  height: 46px;
-  border: 2px solid rgba(71, 87, 78, 0.30);
-  border-left: 0;
-  border-bottom: 0;
-  border-radius: 0 46px 0 0;
+  width: 68px;
+  height: 58px;
+  border: 0;
+  border-radius: 0;
   pointer-events: none;
-  background: radial-gradient(circle at 100% 0, rgba(255,255,255,0.42), transparent 64%);
+  background: transparent;
 }
 
 .door::before {
   content: "";
   position: absolute;
-  right: -2px;
-  top: -3px;
-  width: 4px;
-  height: 50px;
-  border-radius: 999px;
-  background: #f7f3e8;
-  box-shadow: 0 2px 6px rgba(60, 78, 68, 0.18);
+  left: 4px;
+  top: 0;
+  width: 58px;
+  height: 20px;
+  border-radius: 0 0 6px 6px;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.18), transparent 42%),
+    #eadbc4;
+  box-shadow: inset 0 -3px 0 rgba(90, 101, 94, 0.08);
 }
 
 .door::after {
   content: "";
   position: absolute;
-  right: 5px;
-  top: 4px;
-  width: 34px;
-  height: 4px;
-  border-radius: 999px;
-  background: rgba(117, 94, 63, 0.50);
+  left: 6px;
+  top: 7px;
+  width: 48px;
+  height: 48px;
+  border: 2px solid rgba(86, 96, 88, 0.32);
+  border-left: 0;
+  border-bottom: 0;
+  border-radius: 0 48px 0 0;
+  background: radial-gradient(circle at 100% 0, rgba(255,255,255,0.36), transparent 70%);
 }
 
-.door.d1 { left: 20%; top: 64%; transform: rotate(180deg); }
-.door.d2 { left: 38%; top: 64%; transform: rotate(180deg); }
-.door.d3 { left: 68%; top: 64%; transform: rotate(180deg); }
-.door.d4 { left: 50%; bottom: 0; transform: translateX(-50%) rotate(270deg); }
+.door.d1,
+.door.d2,
+.door.d3 {
+  top: calc(69% - 12px);
+}
+
+.door.d1 { left: 19%; }
+.door.d2 { left: 38%; }
+.door.d3 { left: 68%; }
+
+.door.d4 {
+  left: 50%;
+  bottom: -3px;
+  transform: translateX(-50%) rotate(180deg);
+}
+
+.door.d4::before {
+  background: linear-gradient(180deg, rgba(255,255,255,0.60), rgba(238,247,241,0.92));
+}
 
 .window {
   position: absolute;
@@ -631,6 +649,26 @@ button {
     0 13px 20px rgba(50, 70, 58, 0.16);
 }
 
+.device.dimmed {
+  opacity: .22;
+  filter: grayscale(.25);
+}
+
+.lens-risk .room {
+  opacity: .45;
+}
+
+.lens-risk .room.risk {
+  opacity: 1;
+  border-color: #d68b54;
+  box-shadow:
+    inset 12px 12px 0 rgba(255,255,255,0.34),
+    inset -12px -12px 0 rgba(120, 76, 48, 0.10),
+    inset 0 -58px 92px rgba(120, 76, 48, 0.08),
+    0 13px 0 #7f5b44,
+    0 34px 42px rgba(136, 83, 50, 0.20);
+}
+
 .device.light.on {
   color: #fff7c8;
   background:
@@ -793,6 +831,7 @@ button {
   color: var(--muted);
   font-size: 13px;
   font-weight: 760;
+  flex-wrap: wrap;
 }
 
 .legend {
@@ -808,6 +847,30 @@ button {
   background: rgba(255,255,255,0.42);
   color: #3e564b;
   font-weight: 850;
+}
+
+.demo-lens {
+  display: inline-flex;
+  gap: 6px;
+  padding: 5px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.42);
+}
+
+.demo-lens button {
+  border: 0;
+  border-radius: 999px;
+  padding: 7px 10px;
+  background: transparent;
+  color: #4c665a;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.demo-lens button.active {
+  color: #fff;
+  background: var(--sage-deep);
 }
 
 .info-toggle {
@@ -1282,10 +1345,10 @@ button {
 
 .selected-bubble {
   position: absolute;
-  right: clamp(0px, 1.6vw, 24px);
-  top: clamp(18px, 4vw, 50px);
+  right: clamp(14px, 2vw, 30px);
+  bottom: clamp(14px, 2vw, 28px);
   z-index: 60;
-  width: min(250px, 24vw);
+  width: min(270px, 28vw);
   border-radius: 28px;
   padding: 16px;
   background: rgba(255,255,255,0.72);
