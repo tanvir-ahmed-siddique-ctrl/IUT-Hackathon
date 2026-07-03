@@ -1,0 +1,91 @@
+<svg viewBox="0 0 1200 640" xmlns="http://www.w3.org/2000/svg" font-family="Space Grotesk, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#4b5468"/>
+    </marker>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#12151c"/>
+      <stop offset="100%" stop-color="#0d1016"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="0" y="0" width="1200" height="640" fill="url(#bg)"/>
+  <text x="600" y="40" text-anchor="middle" fill="#f5f2ea" font-size="24" font-weight="700">
+    Lights, Fans, Discord — System Architecture
+  </text>
+  <text x="600" y="64" text-anchor="middle" fill="#8b93a7" font-size="13">
+    [Simulated Device Layer] → [Backend API + Socket.IO] → [Web UI] &amp;&amp; [Discord Bot] → User
+  </text>
+
+  <!-- LAYER 1: Simulated devices -->
+  <g>
+    <rect x="60" y="110" width="260" height="150" rx="14" fill="#1a1f2b" stroke="#2f3648" stroke-width="1.5"/>
+    <text x="190" y="136" text-anchor="middle" fill="#ffc069" font-size="15" font-weight="700">Simulated Device Layer</text>
+    <text x="80" y="162" fill="#c9cedb" font-size="12">• 15 devices (3 rooms × 2 fans + 3 lights)</text>
+    <text x="80" y="182" fill="#c9cedb" font-size="12">• simulator.js: random on/off ticks</text>
+    <text x="80" y="202" fill="#c9cedb" font-size="12">• wattage + lastChanged timestamps</text>
+    <text x="80" y="222" fill="#c9cedb" font-size="12">• every 4s: mutate in-memory store</text>
+    <text x="80" y="242" fill="#c9cedb" font-size="12">• (real hardware would replace this)</text>
+  </g>
+
+  <!-- LAYER 2: Backend -->
+  <g>
+    <rect x="410" y="90" width="300" height="230" rx="14" fill="#1a1f2b" stroke="#5eead4" stroke-width="1.5"/>
+    <text x="560" y="116" text-anchor="middle" fill="#5eead4" font-size="15" font-weight="700">Backend (single source of truth)</text>
+    <rect x="430" y="132" width="260" height="50" rx="8" fill="#12151c"/>
+    <text x="560" y="152" text-anchor="middle" fill="#e8e6df" font-size="12" font-weight="600">store.js — in-memory device state</text>
+    <text x="560" y="168" text-anchor="middle" fill="#8b93a7" font-size="10">devices, alerts, today's kWh</text>
+
+    <rect x="430" y="192" width="120" height="50" rx="8" fill="#12151c"/>
+    <text x="490" y="212" text-anchor="middle" fill="#e8e6df" font-size="11" font-weight="600">Express REST</text>
+    <text x="490" y="228" text-anchor="middle" fill="#8b93a7" font-size="9">/api/devices /usage /alerts</text>
+
+    <rect x="560" y="192" width="130" height="50" rx="8" fill="#12151c"/>
+    <text x="625" y="212" text-anchor="middle" fill="#e8e6df" font-size="11" font-weight="600">Socket.IO</text>
+    <text x="625" y="228" text-anchor="middle" fill="#8b93a7" font-size="9">devices:update / alerts:new</text>
+
+    <rect x="430" y="256" width="260" height="46" rx="8" fill="#12151c"/>
+    <text x="560" y="276" text-anchor="middle" fill="#e8e6df" font-size="11" font-weight="600">alerts.js</text>
+    <text x="560" y="291" text-anchor="middle" fill="#8b93a7" font-size="9">after-hours + 2h+ stuck-on detection</text>
+  </g>
+
+  <!-- LAYER 3a: Web Dashboard -->
+  <g>
+    <rect x="800" y="60" width="330" height="140" rx="14" fill="#1a1f2b" stroke="#ffb84d" stroke-width="1.5"/>
+    <text x="965" y="86" text-anchor="middle" fill="#ffb84d" font-size="15" font-weight="700">Web Dashboard (React)</text>
+    <text x="820" y="112" fill="#c9cedb" font-size="12">• Socket.IO client — live, no refresh</text>
+    <text x="820" y="132" fill="#c9cedb" font-size="12">• Office floor-plan SVG (glow / spin)</text>
+    <text x="820" y="152" fill="#c9cedb" font-size="12">• Device panel · Power meter</text>
+    <text x="820" y="172" fill="#c9cedb" font-size="12">• Active alerts panel</text>
+  </g>
+
+  <!-- LAYER 3b: Discord Bot -->
+  <g>
+    <rect x="800" y="220" width="330" height="150" rx="14" fill="#1a1f2b" stroke="#ffb84d" stroke-width="1.5"/>
+    <text x="965" y="246" text-anchor="middle" fill="#ffb84d" font-size="15" font-weight="700">Discord Bot (discord.js)</text>
+    <text x="820" y="272" fill="#c9cedb" font-size="12">• !status  !room &lt;name&gt;  !usage</text>
+    <text x="820" y="292" fill="#c9cedb" font-size="12">• calls same REST API as dashboard</text>
+    <text x="820" y="312" fill="#c9cedb" font-size="12">• llm.js → Claude humanizes replies</text>
+    <text x="820" y="332" fill="#c9cedb" font-size="12">• polls /api/alerts → proactive post</text>
+    <text x="820" y="352" fill="#c9cedb" font-size="12">  to designated alert channel</text>
+  </g>
+
+  <!-- LAYER 4: User -->
+  <g>
+    <rect x="1000" y="440" width="150" height="90" rx="14" fill="#1a1f2b" stroke="#4b5468" stroke-width="1.5"/>
+    <text x="1075" y="470" text-anchor="middle" fill="#f5f2ea" font-size="14" font-weight="700">The Boss</text>
+    <text x="1075" y="490" text-anchor="middle" fill="#8b93a7" font-size="10">(and anyone else</text>
+    <text x="1075" y="504" text-anchor="middle" fill="#8b93a7" font-size="10">in the office)</text>
+  </g>
+
+  <!-- arrows -->
+  <path d="M320,185 L410,185" stroke="#4b5468" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <path d="M710,155 L800,130" stroke="#4b5468" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <path d="M710,230 L800,290" stroke="#4b5468" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <path d="M965,200 L1050,440" stroke="#4b5468" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <path d="M965,370 L1090,440" stroke="#4b5468" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+
+  <text x="600" y="600" text-anchor="middle" fill="#5f6577" font-size="11">
+    One backend, one store, two live front-doors — dashboard and bot never disagree about office state.
+  </text>
+</svg>
