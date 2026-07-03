@@ -515,10 +515,7 @@
     inset: 8px;
   }
 
-  .blade,
-  .device.fan::before,
-  .device.fan::after {
-    content: "";
+  .blade {
     position: absolute;
     left: 50%;
     top: 2px;
@@ -529,9 +526,9 @@
     transform-origin: 50% 20px;
   }
 
-  .device.fan::before { transform: translateX(-50%) rotate(0deg); }
-  .device.fan::after { transform: translateX(-50%) rotate(120deg); }
-  .blade { transform: translateX(-50%) rotate(240deg); }
+  .blade:nth-child(1) { transform: translateX(-50%) rotate(0deg); }
+  .blade:nth-child(2) { transform: translateX(-50%) rotate(120deg); }
+  .blade:nth-child(3) { transform: translateX(-50%) rotate(240deg); }
 
   .device.fan.on {
     color: #f9fffb;
@@ -1673,7 +1670,7 @@ function renderPlan() {
     node.dataset.deviceId = device.id;
     node.setAttribute("aria-label", `${device.room} ${device.label} ${device.on ? "on" : "off"}`);
     node.innerHTML = device.type === "fan"
-      ? `<span class="fan-core"><span class="blade"></span></span>${tooltip(device)}`
+      ? `<span class="fan-core"><span class="blade"></span><span class="blade"></span><span class="blade"></span></span>${tooltip(device)}`
       : tooltip(device);
     node.addEventListener("click", (event) => {
       event.stopPropagation();
